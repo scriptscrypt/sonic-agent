@@ -1,0 +1,52 @@
+{
+  "name": "solana-agent-terminal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ai-sdk/deepseek": "^0.1.8",
+    "@ai-sdk/openai": "^1.1.9",
+    "@langchain/anthropic": "^0.3.13",
+    "@langchain/core": "^0.3.27",
+    "@langchain/deepseek": "^0.0.1",
+    "@langchain/langgraph": "^0.2.38",
+    "@langchain/openai": "^0.3.16",
+    "@phosphor-icons/react": "^2.1.7",
+    "@radix-ui/react-dropdown-menu": "^2.1.4",
+    "@radix-ui/react-slot": "^1.1.1",
+    "@radix-ui/react-switch": "^1.1.2",
+    "@sendaifun/sonic-agent-kit": "^1.0.0",
+    "@solana/web3.js": "^1.98.0",
+    "ai": "^4.1.16",
+    "bs58": "^6.0.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.469.0",
+    "next": "^15.1.3",
+    "next-themes": "^0.4.4",
+    "openai": "^4.82.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^9.0.3",
+    "solana-agent-kit": "1.4.5",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    "web3.js": "link:@types/@solana/web3.js",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "15.1.3",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2"
+  }
+}
