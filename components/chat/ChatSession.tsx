@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { ChatInput, MOCK_MODELS, CHAIN_TYPES } from "./ChatInput";
 import { AGENT_MODES } from "./ModeSelector";
+import { TokenPriceChart } from "./TokenPriceChart";
 
 interface Message {
   id: string;
@@ -22,6 +23,19 @@ interface SwapDetails {
   fees: string;
   slippage: number;
   route: string;
+}
+
+// Add new interface for token price details
+interface TokenPriceDetails {
+  symbol: string;
+  price: number;
+  change24h: number;
+  marketCap: string;
+  volume24h: string;
+}
+
+interface TokenPriceUIProps {
+  tokenDetails: TokenPriceDetails;
 }
 
 interface SwapUIProps {
@@ -248,6 +262,52 @@ function SwapUI({ swapDetails, onConfirm, onCancel }: SwapUIProps) {
   );
 }
 
+// Add TokenPriceUI component
+function TokenPriceUI({ tokenDetails }: TokenPriceUIProps) {
+  return (
+    <div className="w-full">
+      <TokenPriceChart 
+        tokenSymbol={tokenDetails.symbol}
+        currentPrice={tokenDetails.price}
+        priceChange={tokenDetails.change24h}
+      />
+      
+      {/* Additional Token Information */}
+      <div className="bg-accent/5 p-4 rounded-xl border border-accent/20 mt-2">
+        <h3 className="font-semibold text-lg mb-3">Token Information</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <div className="text-sm text-foreground/60">Symbol</div>
+            <div className="font-medium">{tokenDetails.symbol}</div>
+          </div>
+          <div>
+            <div className="text-sm text-foreground/60">Price</div>
+            <div className="font-medium">${tokenDetails.price.toLocaleString()}</div>
+          </div>
+          <div>
+            <div className="text-sm text-foreground/60">24h Change</div>
+            <div className={`font-medium ${tokenDetails.change24h >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {tokenDetails.change24h >= 0 ? '+' : ''}{tokenDetails.change24h}%
+            </div>
+          </div>
+          <div>
+            <div className="text-sm text-foreground/60">Market Cap</div>
+            <div className="font-medium">{tokenDetails.marketCap}</div>
+          </div>
+          <div>
+            <div className="text-sm text-foreground/60">24h Volume</div>
+            <div className="font-medium">{tokenDetails.volume24h}</div>
+          </div>
+          <div>
+            <div className="text-sm text-foreground/60">Rank</div>
+            <div className="font-medium">#{Math.floor(Math.random() * 100) + 1}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
@@ -268,6 +328,10 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
   // Add state for swap UI
   const [showSwapUI, setShowSwapUI] = useState(false);
   const [currentSwapDetails, setCurrentSwapDetails] = useState<SwapDetails | null>(null);
+  
+  // Add state for token price UI
+  const [showTokenPriceUI, setShowTokenPriceUI] = useState(false);
+  const [currentTokenDetails, setCurrentTokenDetails] = useState<TokenPriceDetails | null>(null);
 
   // Function to check if message is about token price
   const isTokenPriceQuery = (message: string): boolean => {
@@ -318,6 +382,18 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
         \nVolume (24h): $${data.volume24h}`
       });
       
+      // Set token details for UI display
+      setCurrentTokenDetails({
+        symbol: tokenSymbol,
+        price: data.price,
+        change24h: data.change24h,
+        marketCap: data.marketCap,
+        volume24h: data.volume24h
+      });
+      
+      // Show token price UI
+      setShowTokenPriceUI(true);
+      
       // Refresh messages from store
       const updatedSession = getSessionById(sessionId);
       if (updatedSession?.messages) {
@@ -359,7 +435,7 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
       
       // MOCK DATA: Instead of making an API call, use mock data
       // This simulates the response from the /api/swapQuote endpoint
-      const mockSwapQuotes = {
+      const mockSwapQuotes: Record<string, Record<string, { rate: number; fees: string; slippage: number; route: string }>> = {
         "ETH": {
           "SOL": { rate: 13.45, fees: "2.50", slippage: 0.5, route: "ETH → USDC → SOL" },
           "BTC": { rate: 0.057, fees: "3.75", slippage: 0.3, route: "ETH → WBTC → BTC" },
@@ -394,8 +470,8 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
       let mockData = { rate: 1.0, fees: "1.00", slippage: 0.1, route: `${fromToken} → ${toToken}` };
       
       // Try to get the specific mock data for this token pair
-      if (mockSwapQuotes[fromToken as keyof typeof mockSwapQuotes] && mockSwapQuotes[fromToken as keyof typeof mockSwapQuotes][toToken as keyof typeof mockSwapQuotes]) {
-        mockData = mockSwapQuotes[fromToken as keyof typeof mockSwapQuotes][toToken as keyof typeof mockSwapQuotes];
+      if (mockSwapQuotes[fromToken] && mockSwapQuotes[fromToken][toToken]) {
+        mockData = mockSwapQuotes[fromToken][toToken];
       }
       
       // Store swap details for UI display
@@ -573,6 +649,16 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
     }
   }, [sessionId]);
 
+  // Add function to check if the message is a new token price request
+  const isNewTokenPriceRequest = (message: string): boolean => {
+    // If we're already showing the token price UI and the message contains token price keywords,
+    // it's likely a new token price request
+    if (showTokenPriceUI && isTokenPriceQuery(message)) {
+      return true;
+    }
+    return false;
+  };
+
   const handleApiCall = async (message: string) => {
     setIsLoading(true);
     try {
@@ -581,6 +667,13 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
         // Hide current swap UI before processing new request
         setShowSwapUI(false);
         setCurrentSwapDetails(null);
+      }
+      
+      // Check if this is a new token price request while already showing the token price UI
+      if (isNewTokenPriceRequest(message)) {
+        // Hide current token price UI before processing new request
+        setShowTokenPriceUI(false);
+        setCurrentTokenDetails(null);
       }
       
       // Check if the message is about token price or swap
@@ -649,6 +742,13 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
         setCurrentSwapDetails(null);
       }
       
+      // Check if this is a new token price request while already showing the token price UI
+      if (isNewTokenPriceRequest(currentInput)) {
+        // Hide current token price UI before processing new request
+        setShowTokenPriceUI(false);
+        setCurrentTokenDetails(null);
+      }
+      
       // Check if the message is about token price or swap
       if (isTokenPriceQuery(currentInput)) {
         await handleTokenPriceQuery(currentInput);
@@ -701,6 +801,20 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
               )}
             </div>
           ))}
+          
+          {/* Show Token Price UI if needed */}
+          {showTokenPriceUI && currentTokenDetails && (
+            <div className="flex justify-start">
+              <div className="flex relative items-start max-w-[85%] w-full">
+                <div className="absolute -left-8 top-2 w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+                  <AgentLogo />
+                </div>
+                <div className="w-full px-4 py-3 text-[15px] tracking-[-0.01em] leading-[1.65] font-medium rounded-2xl text-foreground/90 rounded-bl-sm">
+                  <TokenPriceUI tokenDetails={currentTokenDetails} />
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Show Swap UI if needed */}
           {showSwapUI && currentSwapDetails && (
