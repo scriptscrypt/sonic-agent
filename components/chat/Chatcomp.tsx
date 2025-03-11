@@ -38,6 +38,8 @@ import { useCreateChatSession } from "@/lib/hooks/useChatSessions";
 import { useCreateChatMessage } from "@/lib/hooks/useChatMessages";
 import { useWalletContext } from "@/app/providers/WalletProvider";
 import { WalletInfo } from "@/lib/hooks/useWallet";
+import Link from "next/link";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 const QUICK_SUGGESTIONS = [
   { text: "Launch a Memecoin", category: "NFTs", icon: Coin },
@@ -225,6 +227,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputSectionRef = useRef<HTMLDivElement>(null);
   const { wallets } = useWalletContext();
+  const { user } = useAuth();
 
   // Use React Query hooks
   const createSession = useCreateChatSession();
@@ -290,7 +293,8 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
         },
         body: JSON.stringify({ 
           message: messageToSend, 
-          modelName: selectedModel.name 
+          modelName: selectedModel.name,
+          userId: user?.id
         }),
       });
 

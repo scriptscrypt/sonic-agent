@@ -3,6 +3,12 @@ import { users, NewUser, User } from '../schema';
 import { eq } from 'drizzle-orm';
 
 export const userRepository = {
+  // Get a user by ID
+  async getUserById(id: number): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result[0];
+  },
+
   // Get a user by Privy ID
   async getUserByPrivyId(privyId: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.privyId, privyId));

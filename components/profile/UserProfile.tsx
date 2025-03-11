@@ -55,7 +55,7 @@ export function UserProfile({ isExpanded = true }: UserProfileProps) {
   }
 
   return (
-    <div className="p-4 bg-secondary/20 dark:bg-secondary/20 rounded-lg border border-border/40">
+    <div className="p-4 bg-secondary/40 dark:bg-secondary/80 rounded-lg border border-border/90">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-medium">Wallet</h2>
         <Button

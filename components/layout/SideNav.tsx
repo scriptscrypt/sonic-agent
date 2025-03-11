@@ -7,6 +7,7 @@ import {
 	Plus,
 	Keyboard,
 	Trash,
+	Broadcast,
 } from "@phosphor-icons/react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -163,6 +164,26 @@ export default function SideNav() {
 							)}
 						</Button>
 					</div>
+
+					{/* Custom Divider */}
+					<div className="h-[1px] w-full bg-border/50 shrink-0" />
+
+					{/* Navigation Links */}
+					{(isExpanded || (!isExpanded && isMobile)) && (
+						<div className="px-3 space-y-1">
+							<Button
+								variant="ghost"
+								className={cn(
+									"w-full justify-start",
+									!isExpanded && "md:justify-center"
+								)}
+								onClick={() => router.push("/feed")}
+							>
+								<Broadcast size={18} className="mr-2" />
+								<span>Feed</span>
+							</Button>
+						</div>
+					)}
 
 					{/* Custom Divider */}
 					<div className="h-[1px] w-full bg-border/50 shrink-0" />

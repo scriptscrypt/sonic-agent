@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, varchar, integer, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, varchar, integer, jsonb, decimal } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Users table
@@ -44,10 +44,29 @@ export const nfts = pgTable('nfts', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Tokens table
+export const tokens = pgTable('tokens', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  symbol: varchar('symbol', { length: 50 }).notNull(),
+  description: text('description'),
+  logoUrl: varchar('logo_url', { length: 255 }),
+  price: decimal('price', { precision: 18, scale: 8 }).default('0'),
+  marketCap: decimal('market_cap', { precision: 24, scale: 2 }).default('0'),
+  volume24h: decimal('volume_24h', { precision: 24, scale: 2 }).default('0'),
+  change24h: decimal('change_24h', { precision: 10, scale: 2 }).default('0'),
+  mintAddress: varchar('mint_address', { length: 255 }), // Solana mint address if minted
+  metadata: jsonb('metadata'), // Store additional token metadata as JSON
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Define relations between tables
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(chatSessions),
   nfts: many(nfts),
+  tokens: many(tokens),
 }));
 
 export const chatSessionsRelations = relations(chatSessions, ({ many, one }) => ({
@@ -72,6 +91,13 @@ export const nftsRelations = relations(nfts, ({ one }) => ({
   }),
 }));
 
+export const tokensRelations = relations(tokens, ({ one }) => ({
+  user: one(users, {
+    fields: [tokens.userId],
+    references: [users.id],
+  }),
+}));
+
 // Types for TypeScript
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -80,4 +106,6 @@ export type NewChatSession = typeof chatSessions.$inferInsert;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
 export type NFT = typeof nfts.$inferSelect;
-export type NewNFT = typeof nfts.$inferInsert; 
+export type NewNFT = typeof nfts.$inferInsert;
+export type Token = typeof tokens.$inferSelect;
+export type NewToken = typeof tokens.$inferInsert; 
