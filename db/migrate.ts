@@ -1,11 +1,16 @@
-const { drizzle } = require('drizzle-orm/node-postgres');
-const { migrate } = require('drizzle-orm/node-postgres/migrator');
-const { Pool } = require('pg');
-const dotenv = require('dotenv');
-const fs = require('fs');
-const path = require('path');
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
+import { Pool } from 'pg';
+import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+// ESM equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function main() {
   if (!process.env.DATABASE_URL) {
@@ -21,7 +26,7 @@ async function main() {
   console.log('Running migrations...');
   
   try {
-    await migrate(db, { migrationsFolder: './db/migrations' });
+    await migrate(db as any, { migrationsFolder: './db/migrations' });
     
     // Execute our custom fix migration manually if needed
     const fixMigrationPath = path.join(__dirname, 'migrations', '0004_fix_user_reference.sql');

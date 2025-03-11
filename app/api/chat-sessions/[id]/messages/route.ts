@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatMessagesRepository, chatSessionsRepository } from "@/db/repositories/chatRepository";
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
 
 // GET all messages for a chat session
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, params: any ) {
   try {
     // Use await to ensure params is fully resolved
     const id = await params.id;
@@ -35,7 +30,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 // POST create a new message in a chat session
-export async function POST(req: NextRequest, { params }: Params) {
+export async function POST(req: NextRequest, params: any ) {
   try {
     // Use await to ensure params is fully resolved
     const id = await params.id;

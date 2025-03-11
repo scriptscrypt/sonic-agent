@@ -1,7 +1,7 @@
-const { drizzle } = require('drizzle-orm/node-postgres');
-const { Pool } = require('pg');
-const dotenv = require('dotenv');
-const { users } = require('./schema');
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import dotenv from "dotenv";
+import { users } from "./schema";
 
 dotenv.config();
 
@@ -31,7 +31,7 @@ async function main() {
     
     console.log('Default user created:', defaultUser);
   } catch (error) {
-    console.log('Default user already exists or error creating default user:', error.message);
+    console.log('Default user already exists or error creating default user:', error);
   }
   
   console.log('Seeding completed successfully');

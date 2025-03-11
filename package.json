@@ -2,13 +2,14 @@
   "name": "solana-agent-terminal",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "node -r @swc/register db/migrate.ts",
+    "db:migrate": "node --loader @swc/register/esm.js db/migrate.ts",
     "db:studio": "drizzle-kit studio",
     "db:seed": "node -r @swc/register db/seed.ts",
     "db:fix": "node -r @swc/register db/fix-migration.ts",
@@ -56,6 +57,7 @@
   "devDependencies": {
     "@swc/register": "^0.1.10",
     "@types/node": "^22.10.5",
+    "@types/pg": "^8.11.11",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "dotenv": "^16.4.7",
