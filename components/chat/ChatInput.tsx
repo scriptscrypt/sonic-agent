@@ -43,7 +43,7 @@ type Item = {
 interface ChatInputProps {
   input: string;
   setInput: (value: string) => void;
-  onSubmit: (e: React.FormEvent, selectedModel: Item) => void;
+  onSubmit: (e: React.FormEvent, selectedModel: Item, fullPrompt: string) => void;
   selectedMode: (typeof AGENT_MODES)[0];
   setSelectedMode: (mode: (typeof AGENT_MODES)[0]) => void;
   selectedModel: Item;
@@ -195,14 +195,17 @@ export function ChatInput({
         ? `${input}\nURL: ${uploadedImageUrl}`
         : input;
         
-      // Pass the combined prompt to the API by attaching it to the event
-      const event = { ...e, fullPrompt };
-      onSubmit(event, selectedModel);
+      // Call onSubmit with the fullPrompt as a separate parameter
+      // instead of modifying the event object
+      onSubmit(e, selectedModel, fullPrompt);
       
       // Reset image state
       setSelectedImage(null);
       setImagePreview(null);
       setUploadedImageUrl(null);
+      
+      // Clear the input field
+      setInput("");
     }
   };
 
@@ -233,23 +236,29 @@ export function ChatInput({
         <div className="flex flex-col">
           {/* Current image preview */}
           {imagePreview && (
-            <div className="relative p-4">
+            <div className="relative p-4 border-b border-border/50">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center text-sm font-medium text-muted-foreground">
+                  <Image size={16} className="mr-1" />
+                  Selected Image
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedImage(null);
+                    setImagePreview(null);
+                    setUploadedImageUrl(null);
+                  }}
+                  className="p-1 rounded-full hover:bg-accent/10 text-muted-foreground"
+                >
+                  <X size={16} />
+                </button>
+              </div>
               <img 
                 src={imagePreview} 
                 alt="Preview" 
                 className="max-h-48 rounded-lg object-contain"
               />
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedImage(null);
-                  setImagePreview(null);
-                  setUploadedImageUrl(null);
-                }}
-                className="absolute top-6 right-6 p-1 rounded-full bg-black/50 hover:bg-black/70 text-white"
-              >
-                <X size={16} />
-              </button>
             </div>
           )}
 

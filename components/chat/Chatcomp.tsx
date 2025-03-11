@@ -237,14 +237,13 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
           (integration) => integration.category === selectedCategory
         );
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, model: any, fullPrompt?: string) => {
     e.preventDefault();
     if (!input.trim()) return;
     setIsSubmitting(true);
 
-    // Get the actual input value from the event if it contains the combined prompt
-    // @ts-ignore - accessing custom property
-    const messageWithImage = e.fullPrompt || input;
+    // Use the fullPrompt if provided, otherwise use the input
+    const messageToSend = fullPrompt || input;
 
     try {
       // Step 1: Create session
@@ -267,7 +266,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            content: messageWithImage,
+            content: messageToSend,
             role: "user",
           }),
         }
@@ -290,7 +289,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          message: messageWithImage, 
+          message: messageToSend, 
           modelName: selectedModel.name 
         }),
       });

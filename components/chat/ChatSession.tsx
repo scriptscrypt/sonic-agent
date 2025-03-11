@@ -20,11 +20,41 @@ interface UserMessageProps {
 }
 
 function UserMessage({ content }: UserMessageProps) {
+  // Check if the message contains an image URL
+  const hasImageUrl = content.includes("URL:");
+  
+  // Split the content to separate the text and image URL
+  let messageText = content;
+  let imageUrl = "";
+  
+  if (hasImageUrl) {
+    const parts = content.split("URL:");
+    messageText = parts[0].trim();
+    imageUrl = parts[1].trim();
+  }
+  
   return (
     <div className="flex justify-end mb-4 message-animation">
       <div className="flex relative items-end max-w-[85%]">
         <div className="px-4 py-3 text-[15px] tracking-[-0.01em] leading-[1.65] font-medium rounded-2xl bg-primary text-primary-foreground rounded-br-none shadow-sm">
-          <div className="whitespace-pre-wrap">{content}</div>
+          <div className="whitespace-pre-wrap">{messageText}</div>
+          
+          {/* Display image if URL is present */}
+          {hasImageUrl && (
+            <div className="mt-2 border-t border-primary-foreground/20 pt-2">
+              <div className="text-xs text-primary-foreground/70 mb-1 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                </svg>
+                Attached Image
+              </div>
+              <img 
+                src={imageUrl} 
+                alt="Attached image" 
+                className="max-h-48 w-full rounded-lg object-contain bg-black/5"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -119,22 +149,21 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
     }
   }, [wallets, selectedWallet]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, model: any, fullPrompt?: string) => {
     e.preventDefault();
     if (!input.trim()) return;
     setError(null);
 
-    // Get the actual input value from the event if it contains the combined prompt
-    // @ts-ignore - accessing custom property
-    const messageWithImage = e.fullPrompt || input;
+    // Use the fullPrompt if provided, otherwise use the input
+    const messageToSend = fullPrompt || input;
     
     const currentInput = input;
     setInput("");
 
     try {
-      console.log("Sending message:", messageWithImage);
+      console.log("Sending message:", messageToSend);
       await sendMessage.mutateAsync({
-        message: messageWithImage,
+        message: messageToSend,
         modelName: selectedModel?.name,
       });
       console.log("Message sent successfully");
