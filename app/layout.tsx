@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
 import SideNav from "@/components/layout/SideNav";
 import { ChatProvider } from "@/components/chat/SolanaAgentProvider";
+import { Providers } from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+        <Providers>
           <ChatProvider>
             <div className="fixed inset-0 bg-background flex">
               <SideNav />
@@ -38,7 +38,7 @@ export default function RootLayout({
               </main>
             </div>
           </ChatProvider>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
