@@ -11,8 +11,8 @@
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
     /* Light Mode Colors */
-    --background: 210 20% 98%; /* #F5F7FA - soft light gray */
-    --foreground: 210 29% 15%; /* #212529 - near-black for crisp readability */
+    --background: 210 15% 12%; /* #1A1E23 - dark charcoal gray, near black but distinct from foreground */
+    --foreground: 210 29% 90%; /* #E9EDF2 - light gray for contrast with dark background */
     --card: 0 0% 100%;
     --card-foreground: 210 29% 15%;
     --popover: 0 0% 100%;

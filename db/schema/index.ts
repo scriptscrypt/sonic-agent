@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, varchar, integer } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, varchar, integer, jsonb } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Users table
@@ -31,9 +31,23 @@ export const chatMessages = pgTable('chat_messages', {
   timestamp: timestamp('timestamp').defaultNow().notNull(),
 });
 
+// NFT table
+export const nfts = pgTable('nfts', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  imageUrl: varchar('image_url', { length: 255 }).notNull(),
+  metadata: jsonb('metadata'), // Store additional NFT metadata as JSON
+  mintAddress: varchar('mint_address', { length: 255 }), // Solana mint address if minted
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Define relations between tables
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(chatSessions),
+  nfts: many(nfts),
 }));
 
 export const chatSessionsRelations = relations(chatSessions, ({ many, one }) => ({
@@ -51,10 +65,19 @@ export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
   }),
 }));
 
+export const nftsRelations = relations(nfts, ({ one }) => ({
+  user: one(users, {
+    fields: [nfts.userId],
+    references: [users.id],
+  }),
+}));
+
 // Types for TypeScript
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type ChatSession = typeof chatSessions.$inferSelect;
 export type NewChatSession = typeof chatSessions.$inferInsert;
 export type ChatMessage = typeof chatMessages.$inferSelect;
-export type NewChatMessage = typeof chatMessages.$inferInsert; 
+export type NewChatMessage = typeof chatMessages.$inferInsert;
+export type NFT = typeof nfts.$inferSelect;
+export type NewNFT = typeof nfts.$inferInsert; 

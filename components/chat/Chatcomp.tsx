@@ -242,6 +242,10 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
     if (!input.trim()) return;
     setIsSubmitting(true);
 
+    // Get the actual input value from the event if it contains the combined prompt
+    // @ts-ignore - accessing custom property
+    const messageWithImage = e.fullPrompt || input;
+
     try {
       // Step 1: Create session
       console.log("Creating session...");
@@ -263,7 +267,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            content: input,
+            content: messageWithImage,
             role: "user",
           }),
         }
@@ -286,7 +290,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          message: input, 
+          message: messageWithImage, 
           modelName: selectedModel.name 
         }),
       });
@@ -364,9 +368,9 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
             </div>
             <div className="space-y-4">
               <div className="rounded-2xl p-[5px] bg-accent/10">
-                <div className="text-[10px] sm:text-xs px-2 py-2 text-accent">
+                {/* <div className="text-[10px] sm:text-xs px-2 py-2 text-accent">
                   Pay per session
-                </div>
+                </div> */}
                 <ChatInput
                   input={input}
                   setInput={setInput}

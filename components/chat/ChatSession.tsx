@@ -124,13 +124,17 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
     if (!input.trim()) return;
     setError(null);
 
+    // Get the actual input value from the event if it contains the combined prompt
+    // @ts-ignore - accessing custom property
+    const messageWithImage = e.fullPrompt || input;
+    
     const currentInput = input;
     setInput("");
 
     try {
-      console.log("Sending message:", currentInput);
+      console.log("Sending message:", messageWithImage);
       await sendMessage.mutateAsync({
-        message: currentInput,
+        message: messageWithImage,
         modelName: selectedModel?.name,
       });
       console.log("Message sent successfully");

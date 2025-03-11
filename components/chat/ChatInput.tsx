@@ -1,11 +1,11 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { ArrowRight } from "@phosphor-icons/react";
+import { ArrowRight, Image, X, Spinner, Clock } from "@phosphor-icons/react";
 import * as React from "react";
 import { AGENT_MODES } from "./ModeSelector";
 import { DropdownComp } from "./WalletSelector";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { WalletSelector } from "@/components/wallet/WalletSelector";
 import { WalletInfo } from "@/lib/hooks/useWallet";
 
@@ -54,6 +54,73 @@ interface ChatInputProps {
   setSelectedChainType: (chainType: Item) => void;
 }
 
+// Helper function to format timestamps
+const formatTimestamp = (timestamp: number): string => {
+  const now = Date.now();
+  const diff = now - timestamp;
+  
+  // Less than a minute
+  if (diff < 60 * 1000) {
+    return 'Just now';
+  }
+  
+  // Less than an hour
+  if (diff < 60 * 60 * 1000) {
+    const minutes = Math.floor(diff / (60 * 1000));
+    return `${minutes}m ago`;
+  }
+  
+  // Less than a day
+  if (diff < 24 * 60 * 60 * 1000) {
+    const hours = Math.floor(diff / (60 * 60 * 1000));
+    return `${hours}h ago`;
+  }
+  
+  // Less than a week
+  if (diff < 7 * 24 * 60 * 60 * 1000) {
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+    return `${days}d ago`;
+  }
+  
+  // Format as date
+  const date = new Date(timestamp);
+  return date.toLocaleDateString();
+};
+
+// Add a hook to store recently uploaded images in localStorage
+const useRecentImages = () => {
+  const [recentImages, setRecentImages] = useState<Array<{url: string, timestamp: number}>>([]);
+  
+  // Load recent images from localStorage on component mount
+  useEffect(() => {
+    const storedImages = localStorage.getItem('recentImages');
+    if (storedImages) {
+      try {
+        setRecentImages(JSON.parse(storedImages));
+      } catch (e) {
+        console.error('Error parsing stored images:', e);
+      }
+    }
+  }, []);
+  
+  // Add a new image to the recent images list
+  const addRecentImage = (url: string) => {
+    const newImage = { url, timestamp: Date.now() };
+    const updatedImages = [newImage, ...recentImages].slice(0, 10); // Keep only the 10 most recent
+    setRecentImages(updatedImages);
+    localStorage.setItem('recentImages', JSON.stringify(updatedImages));
+  };
+  
+  // Remove an image from the recent images list
+  const removeRecentImage = (url: string) => {
+    const updatedImages = recentImages.filter(img => img.url !== url);
+    setRecentImages(updatedImages);
+    localStorage.setItem('recentImages', JSON.stringify(updatedImages));
+  };
+  
+  return { recentImages, addRecentImage, removeRecentImage };
+};
+
 export function ChatInput({
   input,
   setInput,
@@ -68,11 +135,74 @@ export function ChatInput({
   setSelectedChainType,
 }: ChatInputProps) {
   const [isEnabled, setIsEnabled] = React.useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [showRecentImages, setShowRecentImages] = useState(false);
+  const { recentImages, addRecentImage, removeRecentImage } = useRecentImages();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    setSelectedImage(file);
+
+    // Upload
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      const { url } = await response.json();
+      // Store the URL separately instead of adding to input
+      setUploadedImageUrl(url);
+      // Add to recent images
+      addRecentImage(url);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const selectRecentImage = (url: string) => {
+    setImagePreview(url);
+    setUploadedImageUrl(url);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
-      onSubmit(e, selectedModel);
+      // Combine the input with the image URL for the API call
+      // but don't show it in the UI
+      const fullPrompt = uploadedImageUrl 
+        ? `${input}\nURL: ${uploadedImageUrl}`
+        : input;
+        
+      // Pass the combined prompt to the API by attaching it to the event
+      const event = { ...e, fullPrompt };
+      onSubmit(event, selectedModel);
+      
+      // Reset image state
+      setSelectedImage(null);
+      setImagePreview(null);
+      setUploadedImageUrl(null);
     }
   };
 
@@ -84,10 +214,93 @@ export function ChatInput({
     });
   };
 
+  // Add this function to handle image deletion
+  const handleDeleteImage = (e: React.MouseEvent, url: string) => {
+    e.stopPropagation(); // Prevent triggering the parent click event
+    removeRecentImage(url);
+    
+    // If the currently selected image is being deleted, clear it
+    if (uploadedImageUrl === url) {
+      setSelectedImage(null);
+      setImagePreview(null);
+      setUploadedImageUrl(null);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="relative rounded-2xl bg-card/90 backdrop-blur-xl shadow-md border border-border/50 transition-all duration-200">
         <div className="flex flex-col">
+          {/* Current image preview */}
+          {imagePreview && (
+            <div className="relative p-4">
+              <img 
+                src={imagePreview} 
+                alt="Preview" 
+                className="max-h-48 rounded-lg object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedImage(null);
+                  setImagePreview(null);
+                  setUploadedImageUrl(null);
+                }}
+                className="absolute top-6 right-6 p-1 rounded-full bg-black/50 hover:bg-black/70 text-white"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* Recent images section */}
+          {!imagePreview && showRecentImages && recentImages.length > 0 && (
+            <div className="p-4 border-b border-border/50">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center text-sm font-medium text-muted-foreground">
+                  <Clock size={16} className="mr-1" />
+                  Recent Images
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowRecentImages(false)}
+                  className="p-1 rounded-full hover:bg-accent/10 text-muted-foreground"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {recentImages.map((img, index) => (
+                  <div 
+                    key={index} 
+                    className="relative aspect-square cursor-pointer rounded-md overflow-hidden border border-border/50 hover:border-accent/50 transition-colors group"
+                    onClick={() => selectRecentImage(img.url)}
+                  >
+                    <img 
+                      src={img.url} 
+                      alt={`Recent ${index + 1}`} 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-1">
+                      <span className="text-[10px] text-white/80">
+                        {formatTimestamp(img.timestamp)}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteImage(e, img.url)}
+                      className="absolute top-1 right-1 p-1 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Remove image"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Text input */}
           <div className="relative flex items-center min-h-[72px]">
             <textarea
               value={input}
@@ -104,29 +317,56 @@ export function ChatInput({
               className="w-full h-[72px] px-6 py-4 outline-none text-base bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground placeholder:text-muted-foreground resize-none"
             />
           </div>
-          <div className="flex items-center h-12 px-6 border-t border-border/50">
+
+          {/* Action buttons */}
+          <div className="flex items-center h-12 p-2 border-t border-border/50">
             <div className="flex items-center overflow-x-auto scrollbar-none">
-              {/* <div className="flex items-center min-w-fit">
-                <DropdownComp
-                  selectedItems={selectedModel}
-                  onItemsChange={setSelectedModel}
-                  items={MOCK_MODELS}
-                />
-              </div> */}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+                ref={fileInputRef}
+              />
+              <div className="relative">
+                {isUploading ? (
+                  <div className="p-2 text-accent">
+                    <Spinner size={20} className="animate-spin" />
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowRecentImages(!showRecentImages)}
+                      className={`p-2 rounded-full hover:bg-accent/10 text-muted-foreground hover:text-accent transition-colors mr-1 ${showRecentImages ? 'text-accent bg-accent/10' : ''}`}
+                      disabled={isUploading || recentImages.length === 0}
+                      title="Recent images"
+                    >
+                      <Clock size={20} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-2 rounded-full hover:bg-accent/10 text-muted-foreground hover:text-accent transition-colors"
+                      disabled={isUploading}
+                      title="Upload new image"
+                    >
+                      <Image size={20} />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
             <div className="ml-auto flex items-center">
               <button
                 type="submit"
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
-                disabled={!input.trim()}
+                disabled={!input.trim() || isUploading}
               >
                 <ArrowRight size={18} weight="bold" />
               </button>
             </div>
           </div>
-          {/* <div className="flex items-center gap-2 mb-2">
-            <WalletSelector onWalletSelect={handleWalletSelect} />
-          </div> */}
         </div>
       </div>
     </form>

@@ -30,7 +30,7 @@ export function UserProfile({ isExpanded = true }: UserProfileProps) {
     return (
       <Button
         variant="outline"
-        className="w-full justify-start"
+        className="w-full justify-center hover:text-gray-800"
         onClick={() => login()}
       >
         <span className="truncate">Sign In</span>

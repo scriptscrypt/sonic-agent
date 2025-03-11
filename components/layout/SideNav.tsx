@@ -152,11 +152,11 @@ export default function SideNav() {
 							<Plus size={17} weight="bold" />
 							{(isExpanded || (!isExpanded && isMobile)) && (
 								<>
-									<span className="text-[15px]">New Thread</span>
-									<div className="ml-auto flex items-center gap-1.5 text-[13px] opacity-60">
+									<span className="text-[15px]">New Chat</span>
+									{/* <div className="ml-auto flex items-center gap-1.5 text-[13px] opacity-60">
 										<Keyboard size={13} weight="bold" />
 										<span>K</span>
-									</div>
+									</div> */}
 								</>
 							)}
 						</Button>
