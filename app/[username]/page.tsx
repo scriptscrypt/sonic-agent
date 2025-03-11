@@ -1,13 +1,7 @@
 import { notFound } from 'next/navigation';
 import { userRepository } from '@/db/repositories/userRepository';
 
-interface ProfilePageProps {
-  params: {
-    username: string;
-  };
-}
-
-export default async function UserProfilePage({ params }: ProfilePageProps) {
+export default async function UserProfilePage({ params }: any) {
   const { username } = params;
   
   // Check if this is a wallet address (simple check for 0x prefix)

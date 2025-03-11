@@ -1,7 +1,7 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface WalletInfo {
   name: string;
@@ -23,13 +23,15 @@ export function useWallet() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (ready) {
-      fetchWallets();
-    }
-  }, [ready, authenticated, user]);
+  // Helper function to format wallet addresses
+  const formatAddress = (address: string): string => {
+    if (!address) return '';
+    const start = address.substring(0, 4);
+    const end = address.substring(address.length - 4);
+    return `${start}...${end}`;
+  };
 
-  const fetchWallets = async () => {
+  const fetchWallets = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     
@@ -38,49 +40,39 @@ export function useWallet() {
         setWallets([]);
         return;
       }
+
+      // Get all linked accounts
+      const linkedAccounts = user.linkedAccounts || [];
       
-      // Get wallets from Privy user object
-      const userWallets: WalletInfo[] = [];
+      // Filter for wallet accounts
+      const walletAccounts = linkedAccounts.filter(
+        (account: LinkedAccount) => account.type === 'wallet'
+      );
       
-      // Add linked wallets if available
-      if (user.linkedAccounts) {
-        // Cast to our interface to avoid TypeScript errors
-        (user.linkedAccounts as LinkedAccount[])
-          .filter(account => account.type === 'wallet' && account.chain === 'solana')
-          .forEach(account => {
-            if (account.address) {
-              userWallets.push({
-                name: 'Linked Solana Wallet',
-                address: account.address,
-                displayAddress: formatAddress(account.address)
-              });
-            }
-          });
-      }
-      
-      // Add embedded wallet if available
-      if (user.wallet && user.wallet.address) {
-        const address = user.wallet.address;
-        userWallets.push({
-          name: 'Default Agent Wallet',
+      // Format wallet info
+      const walletInfo: WalletInfo[] = walletAccounts.map((account: LinkedAccount) => {
+        const address = account.address || '';
+        return {
+          name: account.walletClientType === 'privy' ? 'Embedded Wallet' : 'Connected Wallet',
           address,
-          displayAddress: formatAddress(address)
-        });
-      }
+          displayAddress: formatAddress(address),
+        };
+      });
       
-      setWallets(userWallets);
+      setWallets(walletInfo);
     } catch (err) {
       console.error('Error fetching wallets:', err);
-      setError('Failed to fetch wallet information');
+      setError('Failed to load wallet information');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [authenticated, user]);
 
-  const formatAddress = (address: string): string => {
-    if (!address) return '';
-    return `${address.slice(0, 4)}...${address.slice(-4)}`;
-  };
+  useEffect(() => {
+    if (ready) {
+      fetchWallets();
+    }
+  }, [ready, fetchWallets]);
 
   const createEmbeddedWallet = async () => {
     if (!authenticated) {

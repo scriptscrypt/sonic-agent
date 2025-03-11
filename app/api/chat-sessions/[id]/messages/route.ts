@@ -4,7 +4,7 @@ import { chatSessionsRepository, chatMessagesRepository } from "@/db/repositorie
 // GET all messages for a chat session
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     if (!params || !params.id) {
@@ -36,7 +36,7 @@ export async function GET(
 // POST create a new message in a chat session
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     if (!params || !params.id) {

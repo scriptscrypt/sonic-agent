@@ -5,7 +5,6 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Copy, User, Wallet } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

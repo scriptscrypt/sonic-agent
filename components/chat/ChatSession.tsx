@@ -13,6 +13,7 @@ import {
 } from "@/lib/hooks/useChatMessages";
 import { useWalletContext } from "@/app/providers/WalletProvider";
 import { WalletInfo } from "@/lib/hooks/useWallet";
+import Link from "next/link";
 
 interface UserMessageProps {
   content: string;
@@ -166,12 +167,12 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
           <p className="text-muted-foreground">
             {sessionError instanceof Error ? sessionError.message : "This chat session may have been deleted or doesn't exist."}
           </p>
-          <a
+          <Link
             href="/chat/new"
             className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors"
           >
             Create a new session
-          </a>
+          </Link>
         </div>
       </div>
     );

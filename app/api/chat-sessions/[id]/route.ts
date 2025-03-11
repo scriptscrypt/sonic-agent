@@ -4,7 +4,7 @@ import { chatSessionsRepository } from "@/db/repositories/chatRepository";
 // GET a specific chat session
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     if (!params || !params.id) {
@@ -33,7 +33,7 @@ export async function GET(
 // PUT update a chat session
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     if (!params || !params.id) {
@@ -68,7 +68,7 @@ export async function PUT(
 // DELETE a chat session
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     if (!params || !params.id) {

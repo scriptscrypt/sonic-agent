@@ -52,7 +52,7 @@ export function WalletDisplay({ className }: WalletDisplayProps) {
     return (
       <div className={cn("p-4 bg-secondary/20 rounded-lg space-y-4", className)}>
         <p className="text-sm">
-          You don't have any Solana wallets. Create one to interact with the Solana blockchain.
+          You don&apos;t have any Solana wallets. Create one to interact with the Solana blockchain.
         </p>
         <Button
           onClick={handleCreateWallet}
