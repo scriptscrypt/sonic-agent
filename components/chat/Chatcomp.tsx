@@ -240,17 +240,22 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
+    setIsSubmitting(true);
 
     try {
-      // Create session first
+      // Step 1: Create session
+      console.log("Creating session...");
       const newSession = await createSession.mutateAsync({
         title: input.slice(0, 30) + "...",
         modelName: selectedModel.name,
         modelSubText: selectedModel.subTxt,
       });
 
-      // Add message directly using fetch
-      const messageResponse = await fetch(
+      console.log("Session created:", newSession);
+
+      // Step 2: Add user message
+      console.log("Adding user message...");
+      const userMessageResponse = await fetch(
         `/api/chat-sessions/${newSession.id}/messages`,
         {
           method: "POST",
@@ -264,15 +269,72 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
         }
       );
 
-      if (!messageResponse.ok) {
-        throw new Error("Failed to create message");
+      if (!userMessageResponse.ok) {
+        const errorText = await userMessageResponse.text();
+        console.error("Failed to create user message:", errorText);
+        throw new Error("Failed to create user message");
       }
 
-      // Force navigation to new session
+      const userMessage = await userMessageResponse.json();
+      console.log("User message created:", userMessage);
+
+      // Step 3: Call the chat API to get AI response
+      console.log("Getting AI response...");
+      const aiResponse = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          message: input, 
+          modelName: selectedModel.name 
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        const errorText = await aiResponse.text();
+        console.error("Failed to get AI response:", errorText);
+        throw new Error("Failed to get AI response");
+      }
+
+      const aiData = await aiResponse.json();
+      console.log("AI response received:", aiData);
+
+      // Step 4: Add AI response as a message
+      console.log("Adding assistant message...");
+      const assistantMessageResponse = await fetch(
+        `/api/chat-sessions/${newSession.id}/messages`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: aiData.response,
+            role: "assistant",
+          }),
+        }
+      );
+
+      if (!assistantMessageResponse.ok) {
+        const errorText = await assistantMessageResponse.text();
+        console.error("Failed to create assistant message:", errorText);
+        throw new Error("Failed to create assistant message");
+      }
+
+      const assistantMessage = await assistantMessageResponse.json();
+      console.log("Assistant message created:", assistantMessage);
+
+      // Step 5: Wait a moment to ensure all operations are complete
+      console.log("Waiting for operations to complete...");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Step 6: Force navigation to new session
+      console.log("Navigating to:", `/chat/${newSession.id}`);
       router.push(`/chat/${newSession.id}`);
-      router.refresh(); // Add this to force a refresh if needed
     } catch (error) {
-      console.error("Navigation error:", error);
+      console.error("Error in chat flow:", error);
+      setIsSubmitting(false);
     }
   };
 

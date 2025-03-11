@@ -66,17 +66,43 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
   const [selectedModel, setSelectedModel] = useState(MOCK_MODELS[0]);
   const [selectedChainType, setSelectedChainType] = useState(CHAIN_TYPES[0]);
   const { wallets } = useWalletContext();
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch session and messages using React Query
-  const { data: session, isLoading: isSessionLoading } =
-    useChatSession(sessionId);
-  const { data: messages = [], isLoading: isMessagesLoading } =
-    useChatMessages(sessionId);
+  const { 
+    data: session, 
+    isLoading: isSessionLoading,
+    error: sessionError
+  } = useChatSession(sessionId);
+  
+  const { 
+    data: messages = [], 
+    isLoading: isMessagesLoading, 
+    refetch: refetchMessages,
+    error: messagesError
+  } = useChatMessages(sessionId);
+  
   const sendMessage = useSendMessageToAI(sessionId);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Fetch messages on mount and when sessionId changes
+  useEffect(() => {
+    if (sessionId) {
+      console.log("Fetching messages for session:", sessionId);
+      refetchMessages().then(result => {
+        if (result.data) {
+          console.log("Messages fetched:", result.data);
+        }
+        if (result.error) {
+          console.error("Error fetching messages:", result.error);
+          setError("Failed to load messages");
+        }
+      });
+    }
+  }, [sessionId, refetchMessages]);
 
   useEffect(() => {
     scrollToBottom();
@@ -95,17 +121,22 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
+    setError(null);
 
     const currentInput = input;
     setInput("");
 
     try {
+      console.log("Sending message:", currentInput);
       await sendMessage.mutateAsync({
         message: currentInput,
         modelName: selectedModel?.name,
       });
+      console.log("Message sent successfully");
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error sending message:", error);
+      setError("Failed to send message");
+      setInput(currentInput); // Restore the input if there was an error
     }
   };
 
@@ -124,16 +155,16 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
     );
   }
 
-  if (!session) {
+  if (sessionError || !session) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="flex flex-col items-center space-y-4 max-w-md text-center p-6 bg-card rounded-2xl shadow-md border border-border/50">
           <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
             <AgentLogo />
           </div>
-          <h2 className="text-xl font-semibold">Session not found</h2>
+          <h2 className="text-xl font-semibold">Session Error</h2>
           <p className="text-muted-foreground">
-            This chat session may have been deleted or doesn't exist.
+            {sessionError instanceof Error ? sessionError.message : "This chat session may have been deleted or doesn't exist."}
           </p>
           <a
             href="/chat/new"

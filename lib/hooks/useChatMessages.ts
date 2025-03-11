@@ -61,20 +61,30 @@ export function useCreateChatMessage(sessionId: number) {
 
 // Function to send a message to the AI and get a response
 export async function sendMessageToAI(message: string, modelName: string): Promise<string> {
-  const response = await fetch('/api/chat', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ message, modelName }),
-  });
+  console.log("Sending message to AI:", { message, modelName });
   
-  if (!response.ok) {
-    throw new Error('Failed to get AI response');
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message, modelName }),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Failed to get AI response:", errorText);
+      throw new Error(`Failed to get AI response: ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log("AI response received:", data);
+    return data.response;
+  } catch (error) {
+    console.error("Error in sendMessageToAI:", error);
+    throw error;
   }
-  
-  const data = await response.json();
-  return data.response;
 }
 
 // Hook for sending a message to the AI and storing both the user message and AI response
@@ -84,25 +94,41 @@ export function useSendMessageToAI(sessionId: number) {
   
   return useMutation({
     mutationFn: async ({ message, modelName }: { message: string; modelName: string }) => {
-      // First, create the user message
-      await createMessage.mutateAsync({
-        content: message,
-        role: 'user',
-      });
+      console.log("useSendMessageToAI called with:", { message, modelName, sessionId });
       
-      // Then, get the AI response
-      const aiResponse = await sendMessageToAI(message, modelName);
-      
-      // Finally, create the assistant message
-      await createMessage.mutateAsync({
-        content: aiResponse,
-        role: 'assistant',
-      });
-      
-      return aiResponse;
+      try {
+        // First, create the user message
+        const userMessage = await createMessage.mutateAsync({
+          content: message,
+          role: 'user',
+        });
+        
+        console.log("User message created:", userMessage);
+        
+        // Then, get the AI response
+        const aiResponse = await sendMessageToAI(message, modelName);
+        
+        console.log("AI response received:", aiResponse);
+        
+        // Finally, create the assistant message
+        const assistantMessage = await createMessage.mutateAsync({
+          content: aiResponse,
+          role: 'assistant',
+        });
+        
+        console.log("Assistant message created:", assistantMessage);
+        
+        return aiResponse;
+      } catch (error) {
+        console.error("Error in useSendMessageToAI:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chatMessages', sessionId] });
     },
+    onError: (error) => {
+      console.error("Mutation error in useSendMessageToAI:", error);
+    }
   });
 } 

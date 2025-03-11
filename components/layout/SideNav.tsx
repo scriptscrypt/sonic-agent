@@ -122,7 +122,7 @@ export default function SideNav() {
 											"group-hover:text-accent",
 										)}
 									>
-										SendAI
+										Espio
 									</h1>
 								)}
 							</div>

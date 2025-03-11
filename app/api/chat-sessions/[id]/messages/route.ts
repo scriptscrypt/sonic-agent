@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatSessionsRepository, chatMessagesRepository } from "@/db/repositories/chatRepository";
 
-interface Params {
-  params: {
-    id: string;
-  };
-}
-
 // GET all messages for a chat session
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const id = params.id;
-    const sessionId = parseInt(id);
+    if (!params || !params.id) {
+      return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
+    }
+    
+    const sessionId = parseInt(params.id);
     
     if (isNaN(sessionId)) {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
@@ -34,10 +34,16 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 // POST create a new message in a chat session
-export async function POST(req: NextRequest, { params }: Params) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const id = params.id;
-    const sessionId = parseInt(id);
+    if (!params || !params.id) {
+      return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
+    }
+    
+    const sessionId = parseInt(params.id);
     
     if (isNaN(sessionId)) {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
