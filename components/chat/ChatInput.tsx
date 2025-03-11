@@ -8,12 +8,12 @@ import { DropdownComp } from "./WalletSelector";
 import { useEffect, useState } from "react";
 export const MOCK_MODELS = [
   {
-    name: "Claude",
-    subTxt: "Claude 3.5 Sonnet",
-  },
-  {
     name: "OpenAI",
     subTxt: "GPT-4o-mini",
+  },
+  {
+    name: "Claude",
+    subTxt: "Claude 3.5 Sonnet",
   },
   {
     name: "DeepSeek",
