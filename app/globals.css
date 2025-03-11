@@ -11,25 +11,25 @@
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
     /* Light Mode Colors */
-    --background: 210 15% 12%; /* #1A1E23 - dark charcoal gray, near black but distinct from foreground */
-    --foreground: 210 29% 90%; /* #E9EDF2 - light gray for contrast with dark background */
-    --card: 0 0% 100%;
-    --card-foreground: 210 29% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 29% 15%;
-    --primary: 210 100% 72%; /* #D0EBFF - light sky blue for user messages */
-    --primary-foreground: 210 29% 15%;
-    --secondary: 210 9% 93%; /* #E9ECEF - light neutral gray for agent messages */
-    --secondary-foreground: 210 29% 15%;
-    --muted: 210 9% 93%;
+    --background: 0 0% 100%; /* #FFFFFF - clean white background */
+    --foreground: 210 29% 15%; /* #1E2A3B - dark text for contrast */
+    --card: 0 0% 98%; /* #FAFAFA - slightly off-white for cards */
+    --card-foreground: 210 29% 15%; /* #1E2A3B - dark text for contrast */
+    --popover: 0 0% 98%; /* #FAFAFA - slightly off-white for popovers */
+    --popover-foreground: 210 29% 15%; /* #1E2A3B - dark text for contrast */
+    --primary: 230 84% 63%; /* #4C6EF5 - indigo blue for primary elements */
+    --primary-foreground: 0 0% 100%; /* #FFFFFF - white text on primary */
+    --secondary: 210 9% 93%; /* #E9ECEF - light neutral gray for secondary elements */
+    --secondary-foreground: 210 29% 15%; /* #1E2A3B - dark text on secondary */
+    --muted: 210 9% 93%; /* #E9ECEF - light neutral gray for muted areas */
     --muted-foreground: 215 8% 56%; /* #868E96 - muted gray for secondary text */
-    --accent: 230 84% 63%; /* #4C6EF5 - calm indigo/blue for accent */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 230 84% 63%;
+    --accent: 230 84% 63%; /* #4C6EF5 - indigo blue for accent */
+    --accent-foreground: 0 0% 100%; /* #FFFFFF - white text on accent */
+    --destructive: 0 84.2% 60.2%; /* #EF4444 - red for destructive actions */
+    --destructive-foreground: 0 0% 98%; /* #FAFAFA - light text on destructive */
+    --border: 220 13% 91%; /* #E5E7EB - light gray for borders */
+    --input: 220 13% 91%; /* #E5E7EB - light gray for input borders */
+    --ring: 230 84% 63%; /* #4C6EF5 - indigo blue for focus rings */
 
     /* Border Radius */
     --radius: 1rem; /* 16px */

@@ -42,7 +42,7 @@ export function UserProfile({ isExpanded = true }: UserProfileProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full h-9 w-9 bg-muted/50"
+          className="rounded-full h-9 w-9 bg-muted/50 hover:bg-muted"
           onClick={navigateToProfile}
         >
           <span className="sr-only">Profile</span>
@@ -55,13 +55,13 @@ export function UserProfile({ isExpanded = true }: UserProfileProps) {
   }
 
   return (
-    <div className="p-4 bg-secondary/20 rounded-lg">
+    <div className="p-4 bg-secondary/20 dark:bg-secondary/20 rounded-lg border border-border/40">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-medium">Wallet</h2>
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 px-2 text-xs"
+          className="h-7 px-2 text-xs hover:bg-muted"
           onClick={navigateToProfile}
         >
           <User size={14} className="mr-1" />
@@ -79,7 +79,7 @@ export function UserProfile({ isExpanded = true }: UserProfileProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 px-2 text-xs"
+              className="h-6 px-2 text-xs hover:bg-muted"
               onClick={() => copyToClipboard(user.walletAddress || "")}
             >
               <Copy size={12} className="mr-1" />

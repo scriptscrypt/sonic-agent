@@ -12,10 +12,12 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { AgentLogo } from "./AgentLogo";
 import { UserProfile } from "./UserProfile";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 import { MobileNav } from "./MobileNav";
 import { useRouter } from "next/navigation";
 import { MOCK_MODELS } from "../chat/ChatInput";
 import { useChatSessions, useDeleteChatSession } from "@/lib/hooks/useChatSessions";
+
 export default function SideNav() {
 	const [selectedConversation, setSelectedConversation] = useState<
 		number | null
@@ -73,7 +75,7 @@ export default function SideNav() {
 			<div
 				className={cn(
 					"fixed md:static top-0 left-0 h-screen",
-					"bg-card",
+					"bg-card dark:bg-card",
 					"flex flex-col z-40",
 					"transition-all duration-300 ease-out",
 					"border-r border-border",
@@ -254,6 +256,7 @@ export default function SideNav() {
 								<CaretRight className="h-5 w-5" />
 							</Button>
 						)}
+						<ThemeSwitcher isExpanded={isExpanded} />
 						<UserProfile isExpanded={isExpanded} />
 					</div>
 				</div>

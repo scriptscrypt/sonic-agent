@@ -51,7 +51,7 @@ function UserMessage({ content }: UserMessageProps) {
               <img 
                 src={imageUrl} 
                 alt="Attached image" 
-                className="max-h-48 w-full rounded-lg object-contain bg-black/5"
+                className="max-h-48 w-full rounded-sm object-contain bg-white dark:bg-black/5"
               />
             </div>
           )}
