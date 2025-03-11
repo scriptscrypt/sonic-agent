@@ -16,17 +16,24 @@ export function PrivyProvider({ children }: PrivyProviderProps) {
     <PrivyAuthProvider
       appId={PRIVY_APP_ID}
       config={{
-        loginMethods: ["wallet"],
+        loginMethods: ["wallet", "email"],
         appearance: {
           theme: "dark",
           accentColor: "#3ABAB4",
           logo: "https://your-logo-url.com/logo.png",
           showWalletLoginFirst: true,
-          walletChainType: "solana-only",
+          walletChainType: "ethereum-and-solana",
           walletList: ["detected_solana_wallets"],
         },
         embeddedWallets: {
-          createOnLogin: "users-without-wallets",
+          showWalletUIs: true,
+          priceDisplay: {
+            primary: "native-token",
+            secondary: null
+          },
+          solana: {
+            createOnLogin: "users-without-wallets",
+          },
         },
       }}
     >

@@ -139,13 +139,7 @@ export default function SideNav() {
 								!isExpanded && !isMobile && "justify-center p-2",
 							)}
 							onClick={() => {
-								const newSession = addSession(
-									currentSessionId
-										? (getSessionById(currentSessionId)?.model ??
-												MOCK_MODELS[0])
-										: MOCK_MODELS[0],
-								);
-								router.push(`/chat/${newSession.id}`);
+								router.push(`/chat/new`);
 							}}
 						>
 							<Plus size={17} weight="bold" />

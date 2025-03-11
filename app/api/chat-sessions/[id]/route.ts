@@ -8,10 +8,9 @@ interface Params {
 }
 
 // GET a specific chat session
-export async function GET(req: NextRequest,params: any ) {
+export async function GET(req: NextRequest, { params }: Params) {
   try {
-    // Use await to ensure params is fully resolved
-    const id = await params.id;
+    const id = params.id;
     const sessionId = parseInt(id);
     
     if (isNaN(sessionId)) {
@@ -32,10 +31,9 @@ export async function GET(req: NextRequest,params: any ) {
 }
 
 // PUT update a chat session
-export async function PUT(req: NextRequest,params: any ) {
+export async function PUT(req: NextRequest, { params }: Params) {
   try {
-    // Use await to ensure params is fully resolved
-    const id = await params.id;
+    const id = params.id;
     const sessionId = parseInt(id);
     
     if (isNaN(sessionId)) {
@@ -62,10 +60,9 @@ export async function PUT(req: NextRequest,params: any ) {
 }
 
 // DELETE a chat session
-export async function DELETE(req: NextRequest,params: any ) {
+export async function DELETE(req: NextRequest, { params }: Params) {
   try {
-    // Use await to ensure params is fully resolved
-    const id = await params.id;
+    const id = params.id;
     const sessionId = parseInt(id);
     
     if (isNaN(sessionId)) {

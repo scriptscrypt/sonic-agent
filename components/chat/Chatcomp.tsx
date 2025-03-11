@@ -246,11 +246,21 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 				modelSubText: selectedModel.subTxt,
 			});
 
-			// Add message
-			await createMessage.mutateAsync({
-				content: input,
-				role: "user",
+			// Add message directly using fetch
+			const messageResponse = await fetch(`/api/chat-sessions/${newSession.id}/messages`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					content: input,
+					role: 'user',
+				}),
 			});
+
+			if (!messageResponse.ok) {
+				throw new Error('Failed to create message');
+			}
 
 			// Force navigation to new session
 			router.push(`/chat/${newSession.id}`);
@@ -278,7 +288,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 				>
 					<div className="space-y-4">
 						<h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-foreground text-center">
-							What can I help with?
+						What actions on Sonic you wanna take?
 						</h1>
 					</div>
 					<div className="space-y-4">

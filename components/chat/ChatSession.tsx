@@ -104,7 +104,11 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
   }
 
   if (!session) {
-    return <div className="p-4 text-center">Session not found</div>;
+    return (
+      <div className="p-4 text-center">
+        Session not found. <a href="/chat/new" className="text-primary hover:underline">Create a new session</a>
+      </div>
+    );
   }
 
   return (

@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chatMessagesRepository, chatSessionsRepository } from "@/db/repositories/chatRepository";
+import { chatSessionsRepository, chatMessagesRepository } from "@/db/repositories/chatRepository";
 
+interface Params {
+  params: {
+    id: string;
+  };
+}
 
 // GET all messages for a chat session
-export async function GET(req: NextRequest, params: any ) {
+export async function GET(req: NextRequest, { params }: Params) {
   try {
-    // Use await to ensure params is fully resolved
-    const id = await params.id;
+    const id = params.id;
     const sessionId = parseInt(id);
     
     if (isNaN(sessionId)) {
@@ -30,10 +34,9 @@ export async function GET(req: NextRequest, params: any ) {
 }
 
 // POST create a new message in a chat session
-export async function POST(req: NextRequest, params: any ) {
+export async function POST(req: NextRequest, { params }: Params) {
   try {
-    // Use await to ensure params is fully resolved
-    const id = await params.id;
+    const id = params.id;
     const sessionId = parseInt(id);
     
     if (isNaN(sessionId)) {
