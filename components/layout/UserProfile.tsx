@@ -1,43 +1,54 @@
+'use client';
+
 import { Button } from "@/components/ui/button";
-import { Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { UserProfile as UserProfileComponent } from "@/components/profile/UserProfile";
 import { cn } from "@/lib/utils";
 
 interface UserProfileProps {
-  isExpanded: boolean;
+  isExpanded?: boolean;
 }
 
-export const UserProfile = ({ isExpanded }: UserProfileProps) => {
-  const { theme, setTheme } = useTheme();
+export function UserProfile({ isExpanded = true }: UserProfileProps) {
+  const { user, loading, login, isAuthenticated } = useAuth();
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
-  return (
-    <div
-      className={cn(
-        "flex items-center rounded-md",
-        "transition-all duration-200 ease-out",
-        isExpanded || window.innerWidth < 768
-          ? ["gap-3 p-2.5", "hover:bg-muted/50"]
-          : ["justify-center p-2.5", "hover:bg-muted/50"],
-      )}
-    >
-      <div className="min-w-10 min-h-10 rounded-full bg-muted/80 flex items-center justify-center text-[15px] font-medium text-foreground">
-        SA
-      </div>
-      {(isExpanded || (!isExpanded && window.innerWidth < 768)) && (
-        <>
-          <div className="flex-1 min-w-0">
-            <div className="text-[15px] font-medium text-foreground truncate">DEFAI AGENT</div>
-            <div className="text-[13px] text-muted-foreground">Pro</div>
+  if (loading) {
+    return (
+      <div className="animate-pulse flex items-center gap-3 p-2">
+        <div className="w-8 h-8 rounded-full bg-muted"></div>
+        {isExpanded && (
+          <div className="flex-1">
+            <div className="h-4 bg-muted rounded w-24"></div>
+            <div className="h-3 bg-muted rounded w-16 mt-1"></div>
           </div>
-          <Button variant="ghostNoBackground" size="icon" onClick={toggleTheme} className="hover:bg-muted/50">
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-          </Button>
-        </>
-      )}
+        )}
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Button
+        variant="outline"
+        className="w-full justify-start"
+        onClick={() => login()}
+      >
+        <span className="truncate">Sign In</span>
+      </Button>
+    );
+  }
+
+  // Expanded view with user details
+  if (isExpanded) {
+    return <UserProfileComponent />;
+  }
+
+  // Collapsed view with just avatar
+  return (
+    <div className={cn("flex items-center gap-3 p-2")}>
+      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium">
+        {user.email ? user.email[0].toUpperCase() : 'U'}
+      </div>
     </div>
   );
-};
+}

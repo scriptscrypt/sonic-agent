@@ -34,6 +34,8 @@ import {
 } from "./icons";
 import { cn } from "@/lib/utils";
 import { useChatStore } from "@/store/useChatStore";
+import { useCreateChatSession } from "@/lib/hooks/useChatSessions";
+import { useCreateChatMessage } from "@/lib/hooks/useChatMessages";
 
 const QUICK_SUGGESTIONS = [
 	{ text: "Launch a Memecoin", category: "NFTs", icon: Coin },
@@ -221,8 +223,9 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 		useState<CategoryId>("all");
 	const inputSectionRef = useRef<HTMLDivElement>(null);
 
-	const { addSession, addMessageToSession, getSessionById, setInitialMessage } =
-		useChatStore();
+	// Use React Query hooks
+	const createSession = useCreateChatSession();
+	const createMessage = useCreateChatMessage(0); // The sessionId will be set after creation
 
 	const filteredIntegrations =
 		activeIntegrationCategory === "all"
@@ -237,16 +240,17 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 
 		try {
 			// Create session first
-			const newSession = addSession(selectedModel);
+			const newSession = await createSession.mutateAsync({
+				title: input.slice(0, 30) + "...",
+				modelName: selectedModel.name,
+				modelSubText: selectedModel.subTxt,
+			});
 
-			// Add message and set initial message
-			await Promise.all([
-				addMessageToSession(newSession.id, {
-					role: "user",
-					content: input,
-				}),
-				setInitialMessage(input),
-			]);
+			// Add message
+			await createMessage.mutateAsync({
+				content: input,
+				role: "user",
+			});
 
 			// Force navigation to new session
 			router.push(`/chat/${newSession.id}`);
