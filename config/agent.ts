@@ -6,8 +6,11 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import { createSonicTools, SonicAgentKit } from "@sendaifun/sonic-agent-kit";
 
-export async function initializeAgent(modelName: string, chainType: "solana" | "sonic") {
-  const llm = modelName?.includes("OpenAI") 
+export async function initializeAgent(
+  modelName: string,
+  chainType: "solana" | "sonic"
+) {
+  const llm = modelName?.includes("OpenAI")
     ? new ChatOpenAI({
         modelName: "gpt-4o-mini",
         temperature: 0.3,
@@ -27,13 +30,19 @@ export async function initializeAgent(modelName: string, chainType: "solana" | "
 
   validateEnvironment();
 
-  const sonicAgent = new SonicAgentKit(process.env.SONIC_PRIVATE_KEY! as string, process.env.SONIC_RPC_URL! as string, {
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY! as string,
-  });
+  const sonicAgent = new SonicAgentKit(
+    process.env.SONIC_PRIVATE_KEY! as string,
+    process.env.SONIC_RPC_URL! as string,
+    {
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY! as string,
+    }
+  );
   console.log("sonicAgent", sonicAgent);
   const sonicTools = createSonicTools(sonicAgent);
   const memory = new MemorySaver();
-  const config = { configurable: { thread_id: "1" } };
+  const config = {
+    configurable: { thread_id: Math.random().toString(36).substring(2, 15) },
+  };
 
   const agent = createReactAgent({
     llm,

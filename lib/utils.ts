@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function validateEnvironment() {
   const missingVars: string[] = [];
-  const requiredVars = ["OPENAI_API_KEY", "RPC_URL", "SONIC_PRIVATE_KEY"];
+  const requiredVars = ["OPENAI_API_KEY", "SONIC_RPC_URL", "SONIC_PRIVATE_KEY"];
 
   requiredVars.forEach((varName) => {
     if (!process.env[varName]) {
