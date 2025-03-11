@@ -1,16 +1,37 @@
 import { usePrivy } from '@privy-io/react-auth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 
 export function useAuthCallback() {
   const { ready, authenticated, user } = usePrivy();
   const router = useRouter();
+  const pathname = usePathname();
+  const handledLoginRef = useRef(false);
+  const redirectingRef = useRef(false);
 
   useEffect(() => {
-    if (ready && authenticated && user) {
+    if (ready && authenticated && user && !handledLoginRef.current) {
+      handledLoginRef.current = true;
       handleLogin(user);
+    } else if (ready && !authenticated) {
+      handledLoginRef.current = false;
+      
+      // If not authenticated and on a protected route, redirect to login
+      // But only do this once to prevent loops
+      const isProtectedRoute = 
+        pathname?.startsWith('/profile') ||
+        pathname?.startsWith('/chat/') ||
+        pathname === '/chat';
+        
+      if (isProtectedRoute && !redirectingRef.current && pathname !== '/login') {
+        redirectingRef.current = true;
+        router.push('/login');
+      } else if (pathname === '/login') {
+        // Reset the redirecting flag when on login page
+        redirectingRef.current = false;
+      }
     }
-  }, [ready, authenticated, user]);
+  }, [ready, authenticated, user, pathname]);
 
   const handleLogin = async (user: any) => {
     try {
@@ -43,8 +64,12 @@ export function useAuthCallback() {
         throw new Error('Failed to create/update user');
       }
 
-      // Redirect to home page after successful login
-      router.push('/');
+      // Only redirect to home page if currently on login page
+      // And only do this once to prevent loops
+      if (pathname === '/login' && !redirectingRef.current) {
+        redirectingRef.current = true;
+        router.push('/');
+      }
     } catch (error) {
       console.error('Error handling login:', error);
     }

@@ -4,6 +4,7 @@ import "./globals.css";
 import SideNav from "@/components/layout/SideNav";
 import { ChatProvider } from "@/components/chat/SolanaAgentProvider";
 import { Providers } from "./providers";
+// import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -17,8 +18,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Solana Agent Terminal",
-  description: "Solana Agent Terminal",
+  title: "Espio",
+  description: "Espio",
 };
 
 export default function RootLayout({
@@ -37,6 +38,7 @@ export default function RootLayout({
                 <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8">{children}</div>
               </main>
             </div>
+            {/* <Toaster /> */}
           </ChatProvider>
         </Providers>
       </body>

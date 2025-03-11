@@ -5,6 +5,8 @@ import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { db } from './index';
+import { sql } from 'drizzle-orm';
 
 dotenv.config();
 
@@ -26,24 +28,42 @@ async function main() {
   console.log('Running migrations...');
   
   try {
+    // First try to run the migration using drizzle's migrate function
     await migrate(db as any, { migrationsFolder: './db/migrations' });
-    
-    // Execute our custom fix migration manually if needed
-    const fixMigrationPath = path.join(__dirname, 'migrations', '0004_fix_user_reference.sql');
-    if (fs.existsSync(fixMigrationPath)) {
-      console.log('Running fix migration...');
-      const fixMigrationSql = fs.readFileSync(fixMigrationPath, 'utf8');
-      await pool.query(fixMigrationSql);
-      console.log('Fix migration completed successfully');
-    }
-    
     console.log('Migrations completed successfully');
-  } catch (err) {
-    console.error('Migration error:', err);
-    throw err;
-  } finally {
-    await pool.end();
+  } catch (error) {
+    console.error('Error running migrations:', error);
+    
+    // If that fails, try to manually execute the SQL to add the username column
+    try {
+      console.log('Attempting manual migration...');
+      
+      // Check if username column exists
+      const checkColumn = await db.execute(sql`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'users' AND column_name = 'username'
+      `);
+      
+      if (checkColumn.rows.length === 0) {
+        // Add username column if it doesn't exist
+        await db.execute(sql`ALTER TABLE "users" ADD COLUMN "username" varchar(50)`);
+        console.log('Added username column');
+        
+        // Add unique constraint
+        await db.execute(sql`ALTER TABLE "users" ADD CONSTRAINT "users_username_unique" UNIQUE("username")`);
+        console.log('Added unique constraint on username');
+      } else {
+        console.log('Username column already exists');
+      }
+      
+      console.log('Manual migration completed successfully');
+    } catch (manualError) {
+      console.error('Error running manual migration:', manualError);
+    }
   }
+  
+  process.exit(0);
 }
 
 main().catch((err) => {

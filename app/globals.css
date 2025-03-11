@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -7,57 +7,58 @@
 @layer base {
   :root {
     /* Font families */
-    --font-sans: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-    /* Colors */
-    --background: 0 0% 97.3%;
-    --foreground: 224 71% 4%;
+    /* Light Mode Colors */
+    --background: 210 20% 98%; /* #F5F7FA - soft light gray */
+    --foreground: 210 29% 15%; /* #212529 - near-black for crisp readability */
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card-foreground: 210 29% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
-    --primary: 180 66% 40%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 10% 46%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 180 66% 40%;
+    --popover-foreground: 210 29% 15%;
+    --primary: 210 100% 72%; /* #D0EBFF - light sky blue for user messages */
+    --primary-foreground: 210 29% 15%;
+    --secondary: 210 9% 93%; /* #E9ECEF - light neutral gray for agent messages */
+    --secondary-foreground: 210 29% 15%;
+    --muted: 210 9% 93%;
+    --muted-foreground: 215 8% 56%; /* #868E96 - muted gray for secondary text */
+    --accent: 230 84% 63%; /* #4C6EF5 - calm indigo/blue for accent */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 180 66% 40%;
+    --ring: 230 84% 63%;
 
     /* Border Radius */
-    --radius: 0.75rem;
-    --radius-sm: 0.5rem;
-    --radius-lg: 1rem;
+    --radius: 1rem; /* 16px */
+    --radius-sm: 0.75rem; /* 12px */
+    --radius-lg: 1.5rem; /* 24px */
     --radius-full: 9999px;
   }
 
   .dark {
-    --background: 222 11% 8%;
-    --foreground: 210 8% 97%;
-    --card: 215 13% 12%;
-    --card-foreground: 210 8% 97%;
-    --popover: 215 13% 12%;
-    --popover-foreground: 210 8% 97%;
-    --primary: 180 100% 45%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 222 11% 12%;
-    --secondary-foreground: 210 8% 97%;
-    --muted: 222 11% 12%;
-    --muted-foreground: 215 8% 65%;
-    --accent: 180 100% 45%;
-    --accent-foreground: 0 0% 0%;
+    /* Dark Mode Colors */
+    --background: 0 0% 7%; /* #121212 - deep charcoal black */
+    --foreground: 0 0% 100%; /* #FFFFFF */
+    --card: 0 0% 18%; /* #2E2E2E */
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 18%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 230 84% 63%; /* #4C6EF5 - indigo blue for user messages */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 18%; /* #2E2E2E - dark gray for agent messages */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 65%; /* #A6A6A6 - muted gray for secondary text */
+    --accent: 225 95% 78%; /* #91A7FF - light indigo for accent */
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 8% 97%;
-    --border: 222 11% 15%;
-    --input: 222 11% 15%;
-    --ring: 180 100% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 225 95% 78%;
   }
 }
 
@@ -89,11 +90,11 @@
   }
 
   p {
-    @apply text-sm text-muted-foreground leading-relaxed;
+    @apply text-base text-foreground leading-relaxed;
   }
 
   small {
-    @apply text-xs text-muted-foreground;
+    @apply text-sm text-muted-foreground;
   }
 
   /* Monospace Elements */
@@ -111,21 +112,41 @@
   }
 
   .text-label {
-    @apply text-xs font-medium uppercase tracking-wide text-muted-foreground;
+    @apply text-sm font-medium uppercase tracking-wide text-muted-foreground;
   }
 
   .text-body {
-    @apply text-sm text-muted-foreground leading-relaxed;
+    @apply text-base text-foreground leading-relaxed;
   }
 
   .text-body-strong {
-    @apply text-sm font-medium text-foreground;
+    @apply text-base font-medium text-foreground;
+  }
+
+  .text-metadata {
+    @apply text-sm text-muted-foreground;
   }
 
   .wallet-address {
     font-family: var(--font-mono);
     @apply text-xs tracking-tight text-muted-foreground;
   }
+}
+
+/* Chat message animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-animation {
+  animation: fadeInUp 0.3s ease-out;
 }
 
 /* Custom scrollbar styles */

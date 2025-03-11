@@ -6,6 +6,9 @@ import * as React from "react";
 import { AGENT_MODES } from "./ModeSelector";
 import { DropdownComp } from "./WalletSelector";
 import { useEffect, useState } from "react";
+import { WalletSelector } from "@/components/wallet/WalletSelector";
+import { WalletInfo } from "@/lib/hooks/useWallet";
+
 export const MOCK_MODELS = [
   {
     name: "OpenAI",
@@ -18,7 +21,7 @@ export const MOCK_MODELS = [
   {
     name: "DeepSeek",
     subTxt: "DeepSeek-V3 Base",
-  }
+  },
 ];
 
 export const CHAIN_TYPES = [
@@ -29,13 +32,13 @@ export const CHAIN_TYPES = [
   {
     name: "Sonic",
     subTxt: "Mobius - Sonic SVM Mainnet",
-  }
+  },
 ];
 
 type Item = {
   name: string;
   subTxt: string;
-}
+};
 
 interface ChatInputProps {
   input: string;
@@ -45,8 +48,8 @@ interface ChatInputProps {
   setSelectedMode: (mode: (typeof AGENT_MODES)[0]) => void;
   selectedModel: Item;
   setSelectedModel: (model: Item) => void;
-  selectedWallet: Item;
-  setSelectedWallet: (wallet: Item) => void;
+  selectedWallet: Item | null;
+  setSelectedWallet: (wallet: Item | null) => void;
   selectedChainType: Item;
   setSelectedChainType: (chainType: Item) => void;
 }
@@ -65,18 +68,7 @@ export function ChatInput({
   setSelectedChainType,
 }: ChatInputProps) {
   const [isEnabled, setIsEnabled] = React.useState(false);
-  const [wallets, setWallets] = useState([{
-    name: "Default Agent Wallet",
-    subTxt: "",
-  }]);
 
-  useEffect(() => {
-    fetch("/api/wallet")
-      .then((res) => res.json())
-      .then((data) => {
-        setWallets(data.wallets);
-      });
-  }, []);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
@@ -84,16 +76,24 @@ export function ChatInput({
     }
   };
 
+  // Convert WalletInfo to Item format
+  const handleWalletSelect = (wallet: WalletInfo) => {
+    setSelectedWallet({
+      name: wallet.name,
+      subTxt: wallet.displayAddress,
+    });
+  };
+
   return (
     <form onSubmit={handleSubmit}>
-      <div className="relative rounded-2xl bg-card/90 backdrop-blur-xl shadow-sm transition-all duration-200">
+      <div className="relative rounded-2xl bg-card/90 backdrop-blur-xl shadow-md border border-border/50 transition-all duration-200">
         <div className="flex flex-col">
           <div className="relative flex items-center min-h-[72px]">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   if (input.trim()) {
                     handleSubmit(e as any);
@@ -104,36 +104,29 @@ export function ChatInput({
               className="w-full h-[72px] px-6 py-4 outline-none text-base bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground placeholder:text-muted-foreground resize-none"
             />
           </div>
-          <div className="flex items-center h-12 px-6 border-t border-border">
+          <div className="flex items-center h-12 px-6 border-t border-border/50">
             <div className="flex items-center overflow-x-auto scrollbar-none">
-              <div className="flex items-center min-w-fit">
-                <DropdownComp selectedItems={selectedModel} onItemsChange={setSelectedModel} items={MOCK_MODELS} />
-
-                {/* You can use the ModeSelector component if you want to use the default mode selector UI */}
-                {/* <ModeSelector selectedMode={selectedMode} onModeChange={setSelectedMode} /> */}
-                {/* <div className="mx-4 h-4 w-[1px] bg-border shrink-0" />
-                <DropdownComp selectedItems={selectedWallet} onItemsChange={setSelectedWallet} items={wallets} /> */}
-              </div>
-              {/* <div className="mx-4 h-4 w-[1px] bg-border shrink-0" />
-              <DropdownComp selectedItems={selectedChainType} onItemsChange={setSelectedChainType} items={CHAIN_TYPES} /> */}
+              {/* <div className="flex items-center min-w-fit">
+                <DropdownComp
+                  selectedItems={selectedModel}
+                  onItemsChange={setSelectedModel}
+                  items={MOCK_MODELS}
+                />
+              </div> */}
             </div>
             <div className="ml-auto flex items-center">
-              
-              {/* You can use the Toggle component if you want to use the default toggle UI */}
-              {/* <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Auto Sign</span>
-                <Toggle checked={isEnabled} onCheckedChange={setIsEnabled} aria-label="Auto sign toggle" />
-              </div> */}
-              <div className="mx-4 h-4 w-[1px] bg-border shrink-0" />
-              <div 
-                onClick={handleSubmit}
-                className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+              <button
+                type="submit"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-colors"
+                disabled={!input.trim()}
               >
-                <kbd className="px-2 py-1 text-[11px] font-medium bg-muted rounded-md">⌘</kbd>
-                <ArrowRight size={16} weight="bold" className="text-muted-foreground" />
-              </div>
+                <ArrowRight size={18} weight="bold" />
+              </button>
             </div>
           </div>
+          {/* <div className="flex items-center gap-2 mb-2">
+            <WalletSelector onWalletSelect={handleWalletSelect} />
+          </div> */}
         </div>
       </div>
     </form>

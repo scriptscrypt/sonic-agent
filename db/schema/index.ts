@@ -7,6 +7,7 @@ export const users = pgTable('users', {
   privyId: varchar('privy_id', { length: 255 }).notNull().unique(),
   walletAddress: varchar('wallet_address', { length: 255 }),
   email: varchar('email', { length: 255 }),
+  username: varchar('username', { length: 50 }).unique(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

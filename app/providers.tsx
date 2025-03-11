@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, ReactNode } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { PrivyProvider } from './providers/PrivyProvider';
+import { WalletProvider } from './providers/WalletProvider';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -23,7 +24,9 @@ export function Providers({ children }: ProvidersProps) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="dark">
         <PrivyProvider>
-          {children}
+          <WalletProvider>
+            {children}
+          </WalletProvider>
         </PrivyProvider>
       </ThemeProvider>
     </QueryClientProvider>

@@ -68,14 +68,60 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "pulse": {
+          "0%, 100%": { opacity: "0.5" },
+          "50%": { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in-up": "fade-in-up 0.3s ease-out",
+        "pulse": "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: '100%',
+            color: 'hsl(var(--foreground))',
+            a: {
+              color: 'hsl(var(--accent))',
+              textDecoration: 'underline',
+              fontWeight: '500',
+            },
+            p: {
+              marginTop: '1em',
+              marginBottom: '1em',
+            },
+            code: {
+              color: 'hsl(var(--foreground))',
+              backgroundColor: 'hsl(var(--muted))',
+              padding: '0.2em 0.4em',
+              borderRadius: '0.25rem',
+              fontWeight: '400',
+              fontFamily: 'var(--font-mono)',
+            },
+            'pre code': {
+              backgroundColor: 'transparent',
+              padding: '0',
+            },
+            pre: {
+              backgroundColor: 'hsl(var(--card))',
+              color: 'hsl(var(--card-foreground))',
+              borderRadius: 'var(--radius)',
+              padding: '1em',
+              overflow: 'auto',
+            },
+          },
+        },
       },
     },
   },
-  plugins: [animate],
+  plugins: [animate, require('@tailwindcss/typography')],
 } satisfies Config;
 
 export default config;

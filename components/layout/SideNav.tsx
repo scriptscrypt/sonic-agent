@@ -13,11 +13,9 @@ import { cn } from "@/lib/utils";
 import { AgentLogo } from "./AgentLogo";
 import { UserProfile } from "./UserProfile";
 import { MobileNav } from "./MobileNav";
-import { HISTORY_ITEMS } from "@/config/history";
-import { useChatStore } from "@/store/useChatStore";
 import { useRouter } from "next/navigation";
 import { MOCK_MODELS } from "../chat/ChatInput";
-
+import { useChatSessions, useDeleteChatSession } from "@/lib/hooks/useChatSessions";
 export default function SideNav() {
 	const [selectedConversation, setSelectedConversation] = useState<
 		number | null
@@ -26,14 +24,10 @@ export default function SideNav() {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(true);
 	const [isMobile, setIsMobile] = useState(false);
-	const {
-		sessions,
-		currentSessionId,
-		addSession,
-		setCurrentSession,
-		deleteSession,
-		getSessionById,
-	} = useChatStore();
+
+	// Use React Query hooks for sessions
+	const { data: sessions = [], isLoading: isSessionsLoading } = useChatSessions();
+	const deleteSessionMutation = useDeleteChatSession();
 
 	useEffect(() => {
 		const checkMobile = () => {
@@ -50,9 +44,22 @@ export default function SideNav() {
 		setIsExpanded(!isExpanded);
 	};
 
-	const handleSessionClick = (sessionId: number) => {
-		setCurrentSession(sessionId);
+	const handleSessionClick = async (sessionId: number) => {
+		setSelectedConversation(sessionId);
 		router.push(`/chat/${sessionId}`);
+	};
+
+	const handleDeleteSession = async (sessionId: number, e: React.MouseEvent) => {
+		e.stopPropagation();
+		try {
+			await deleteSessionMutation.mutateAsync(sessionId);
+			// If we're on the deleted session's page, redirect to home
+			if (selectedConversation === sessionId) {
+				router.push('/');
+			}
+		} catch (error) {
+			console.error("Error deleting session:", error);
+		}
 	};
 
 	return (
@@ -170,49 +177,56 @@ export default function SideNav() {
 								</div>
 							</div>
 							<div className="px-3 space-y-1 overflow-y-auto max-h-[calc(100vh-280px)]">
-								{sessions.map((item, index) => (
-									<Button
-										key={index}
-										variant="ghost"
-										className={cn(
-											"group flex flex-col items-start w-full px-2 sm:px-3 py-2 sm:py-2.5 h-auto",
-											"overflow-hidden relative",
-											currentSessionId === item.id
-												? "bg-muted"
-												: "hover:bg-muted/50",
-										)}
-										onClick={() => handleSessionClick(item.id)}
-									>
-										<div className="w-full">
-											<div
-												className={cn(
-													"text-[13px] sm:text-[14px] text-left truncate",
-													currentSessionId === item.id
-														? "text-foreground"
-														: "text-muted-foreground",
-												)}
-											>
-												{item.title}
-											</div>
-											<div className="text-[11px] sm:text-[12px] text-muted-foreground mt-1 text-left truncate">
-												{item.timestamp}
-											</div>
-										</div>
-
-										{/* Delete button */}
+								{isSessionsLoading ? (
+									<div className="text-center py-4 text-sm text-muted-foreground">
+										Loading sessions...
+									</div>
+								) : sessions.length === 0 ? (
+									<div className="text-center py-4 text-sm text-muted-foreground">
+										No sessions yet
+									</div>
+								) : (
+									sessions.map((item) => (
 										<Button
+											key={item.id}
 											variant="ghost"
-											size="icon"
-											className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
-											onClick={(e) => {
-												e.stopPropagation();
-												deleteSession(item.id);
-											}}
+											className={cn(
+												"group flex flex-col items-start w-full px-2 sm:px-3 py-2 sm:py-2.5 h-auto",
+												"overflow-hidden relative",
+												selectedConversation === item.id
+													? "bg-muted"
+													: "hover:bg-muted/50",
+											)}
+											onClick={() => handleSessionClick(item.id)}
 										>
-											<Trash size={14} weight="bold" />
+											<div className="w-full">
+												<div
+													className={cn(
+														"text-[13px] sm:text-[14px] text-left truncate",
+														selectedConversation === item.id
+															? "text-foreground"
+															: "text-muted-foreground",
+													)}
+												>
+													{item.title}
+												</div>
+												<div className="text-[11px] sm:text-[12px] text-muted-foreground mt-1 text-left truncate">
+													{new Date(item.timestamp).toLocaleString()}
+												</div>
+											</div>
+
+											{/* Delete button */}
+											<Button
+												variant="ghost"
+												size="icon"
+												className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+												onClick={(e) => handleDeleteSession(item.id, e)}
+											>
+												<Trash size={14} weight="bold" />
+											</Button>
 										</Button>
-									</Button>
-								))}
+									))
+								)}
 							</div>
 						</div>
 					)}

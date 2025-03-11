@@ -26,13 +26,21 @@ export async function GET(req: NextRequest) {
 // POST create or update user
 export async function POST(req: NextRequest) {
   try {
-    const { privyId, walletAddress, email } = await req.json();
+    const { privyId, walletAddress, email, username } = await req.json();
     
     if (!privyId) {
       return NextResponse.json({ error: "Privy ID is required" }, { status: 400 });
     }
     
-    const user = await userRepository.getOrCreateUserByPrivyId(privyId, walletAddress, email);
+    // If username is provided, check if it's already taken
+    if (username) {
+      const existingUserWithUsername = await userRepository.getUserByUsername(username);
+      if (existingUserWithUsername && existingUserWithUsername.privyId !== privyId) {
+        return NextResponse.json({ error: "Username already taken" }, { status: 400 });
+      }
+    }
+    
+    const user = await userRepository.getOrCreateUserByPrivyId(privyId, walletAddress, email, username);
     
     return NextResponse.json(user);
   } catch (error) {

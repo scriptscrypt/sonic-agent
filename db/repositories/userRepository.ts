@@ -15,6 +15,12 @@ export const userRepository = {
     return result[0];
   },
 
+  // Get a user by username
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result[0];
+  },
+
   // Create a new user
   async createUser(user: NewUser): Promise<User> {
     const result = await db.insert(users).values(user).returning();
@@ -36,16 +42,18 @@ export const userRepository = {
   },
 
   // Get or create a user by Privy ID
-  async getOrCreateUserByPrivyId(privyId: string, walletAddress?: string, email?: string): Promise<User> {
+  async getOrCreateUserByPrivyId(privyId: string, walletAddress?: string, email?: string, username?: string): Promise<User> {
     const existingUser = await this.getUserByPrivyId(privyId);
     
     if (existingUser) {
-      // Update wallet address or email if provided and different
+      // Update wallet address, email, or username if provided and different
       if ((walletAddress && existingUser.walletAddress !== walletAddress) || 
-          (email && existingUser.email !== email)) {
+          (email && existingUser.email !== email) ||
+          (username && existingUser.username !== username)) {
         return this.updateUser(existingUser.id, {
           walletAddress,
           email,
+          username,
         }) as Promise<User>;
       }
       return existingUser;
@@ -56,6 +64,7 @@ export const userRepository = {
       privyId,
       walletAddress,
       email,
+      username,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
