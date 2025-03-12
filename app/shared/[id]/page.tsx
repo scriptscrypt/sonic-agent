@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 import { ChatMessage } from "@/db/schema";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { X } from "@phosphor-icons/react";
@@ -140,7 +141,45 @@ export default function SharedChatPage() {
                       <div className="text-sm font-medium mb-1">
                         {message.role === 'user' ? (isOwner ? 'You' : 'User') : 'Assistant'}
                       </div>
-                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      {(() => {
+                        // Check if the message contains an image URL
+                        const hasImageUrl = message.content.includes("URL:");
+                        
+                        // Split the content to separate the text and image URL
+                        let messageText = message.content;
+                        let imageUrl = "";
+                        
+                        if (hasImageUrl) {
+                          const parts = message.content.split("URL:");
+                          messageText = parts[0].trim();
+                          imageUrl = parts[1].trim();
+                        }
+                        
+                        return (
+                          <>
+                            <div className="whitespace-pre-wrap">{messageText}</div>
+                            
+                            {/* Display image if URL is present */}
+                            {hasImageUrl && (
+                              <div className="mt-2 border-t border-primary-foreground/20 pt-2">
+                                <div className="text-xs text-muted-foreground mb-1 flex items-center">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                  </svg>
+                                  Attached Image
+                                </div>
+                                <Image
+                                  width={300}
+                                  height={300}
+                                  src={imageUrl} 
+                                  alt="Attached image" 
+                                  className="max-h-48 w-full rounded-sm object-contain bg-white dark:bg-black/5"
+                                />
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                       <div className="text-xs mt-2 opacity-70">
                         {new Date(message.timestamp).toLocaleTimeString()}
                       </div>
