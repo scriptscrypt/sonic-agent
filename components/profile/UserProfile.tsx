@@ -27,7 +27,7 @@ export function UserProfile({ isExpanded = true }: UserProfileProps) {
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const navigateToProfile = () => {
+  const navigateToSettings = () => {
     router.push("/profile");
   };
 
@@ -43,9 +43,9 @@ export function UserProfile({ isExpanded = true }: UserProfileProps) {
           variant="ghost"
           size="icon"
           className="rounded-full h-9 w-9 bg-muted/50 hover:bg-muted"
-          onClick={navigateToProfile}
+          onClick={navigateToSettings}
         >
-          <span className="sr-only">Profile</span>
+          <span className="sr-only">Settings</span>
           <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary">
             {user.email ? user.email[0].toUpperCase() : "U"}
           </div>
@@ -56,19 +56,6 @@ export function UserProfile({ isExpanded = true }: UserProfileProps) {
 
   return (
     <div className="p-4 bg-secondary/40 dark:bg-secondary/80 rounded-lg border border-border/90">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-medium">Wallet</h2>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 text-xs hover:bg-muted"
-          onClick={navigateToProfile}
-        >
-          <User size={14} className="mr-1" />
-          Profile
-        </Button>
-      </div>
-
       {user.walletAddress ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -102,7 +89,7 @@ export function UserProfile({ isExpanded = true }: UserProfileProps) {
             variant="outline"
             size="sm"
             className="text-xs"
-            onClick={navigateToProfile}
+            onClick={navigateToSettings}
           >
             Connect Wallet
           </Button>

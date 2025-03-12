@@ -133,7 +133,7 @@ const ProfileDropdown = ({ user, logout, router }: ProfileDropdownProps) => {
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/profile")}>
             <GearSix className="mr-2 h-4 w-4" />
-            <span>Profile settings</span>
+            <span>Settings</span>
           </DropdownMenuItem>
         </div>
         

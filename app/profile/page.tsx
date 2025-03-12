@@ -9,13 +9,50 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, X, Trash } from 'lucide-react';
 import { WalletDisplay } from '@/components/wallet/WalletDisplay';
+import Image from 'next/image';
+import { toast } from 'sonner';
 
-export default function ProfilePage() {
+// Hook to get recent images from localStorage
+const useRecentImages = () => {
+  const [recentImages, setRecentImages] = useState<
+    Array<{ url: string; timestamp: number }>
+  >([]);
+
+  // Load recent images from localStorage on component mount
+  useEffect(() => {
+    const storedImages = localStorage.getItem("recentImages");
+    if (storedImages) {
+      try {
+        setRecentImages(JSON.parse(storedImages));
+      } catch (e) {
+        console.error("Error parsing stored images:", e);
+      }
+    }
+  }, []);
+
+  // Remove an image from the recent images list
+  const removeRecentImage = (url: string) => {
+    const updatedImages = recentImages.filter((img) => img.url !== url);
+    setRecentImages(updatedImages);
+    localStorage.setItem("recentImages", JSON.stringify(updatedImages));
+  };
+
+  return { recentImages, removeRecentImage };
+};
+
+// Format timestamp to readable date
+const formatTimestamp = (timestamp: number) => {
+  const date = new Date(timestamp);
+  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+};
+
+export default function SettingsPage() {
   const { user, loading } = useAuth();
   const { authenticated, ready, user: privyUser, logout, linkEmail, linkWallet, unlinkEmail, unlinkWallet } = usePrivy();
   const router = useRouter();
+  const { recentImages, removeRecentImage } = useRecentImages();
   
   const [username, setUsername] = useState('');
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
@@ -26,6 +63,7 @@ export default function ProfilePage() {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+  const [deletingImageIds, setDeletingImageIds] = useState<string[]>([]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -125,6 +163,37 @@ export default function ProfilePage() {
     }
   };
 
+  // Handle image deletion
+  const handleDeleteImage = async (url: string) => {
+    // Add the URL to the deleting list
+    setDeletingImageIds((prev) => [...prev, url]);
+
+    try {
+      // Delete from Supabase storage
+      const response = await fetch("/api/upload/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete image");
+      }
+
+      // Remove from recent images list
+      removeRecentImage(url);
+      toast.success("Image deleted successfully");
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      toast.error("Failed to delete image");
+    } finally {
+      // Remove the URL from the deleting list
+      setDeletingImageIds((prev) => prev.filter((id) => id !== url));
+    }
+  };
+
   if (loading || !ready) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -135,7 +204,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container max-w-4xl py-10 mt-4">
-      <h1 className="text-3xl font-bold mb-6">Profile Settings</h1>
+      <h1 className="text-3xl font-bold mb-6">Settings</h1>
       
       {notification && (
         <div className={`mb-4 p-4 rounded-md flex items-center ${
@@ -155,6 +224,7 @@ export default function ProfilePage() {
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="wallet">Wallet</TabsTrigger>
           <TabsTrigger value="email">Email</TabsTrigger>
+          <TabsTrigger value="images">Images</TabsTrigger>
         </TabsList>
         
         <TabsContent value="profile">
@@ -188,9 +258,6 @@ export default function ProfilePage() {
                 {!isChecking && isAvailable === true && <p className="text-sm text-green-500">Username is available</p>}
                 <p className="text-sm text-muted-foreground">
                   Your profile URL: {username ? `${window.location.origin}/${username}` : 'Set a username to get a custom URL'}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  A random username was generated for you when you signed up. You can change it here.
                 </p>
               </div>
               
@@ -253,6 +320,59 @@ export default function ProfilePage() {
                   <Button onClick={() => linkEmail()}>
                     Connect Email
                   </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="images">
+          <Card>
+            <CardHeader>
+              <CardTitle>Uploaded Images</CardTitle>
+              <CardDescription>
+                View and manage your uploaded images.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recentImages.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No images uploaded yet
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {recentImages.map((img, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-square rounded-md overflow-hidden border border-border group"
+                    >
+                      <Image
+                        width={200}
+                        height={200}
+                        src={img.url}
+                        alt={`Uploaded image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
+                        <span className="text-xs text-white/80">
+                          {formatTimestamp(img.timestamp)}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteImage(img.url)}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Delete image"
+                        disabled={deletingImageIds.includes(img.url)}
+                      >
+                        {deletingImageIds.includes(img.url) ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <X className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>

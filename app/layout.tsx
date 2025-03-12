@@ -4,7 +4,7 @@ import "./globals.css";
 import { ChatProvider } from "@/components/chat/SolanaAgentProvider";
 import { Providers } from "./providers";
 import { ClientLayout } from "./components/ClientLayout";
-// import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,7 +35,7 @@ export default function RootLayout({
             <ClientLayout>
               {children}
             </ClientLayout>
-            {/* <Toaster /> */}
+            <Toaster position="top-center" />
           </ChatProvider>
         </Providers>
       </body>
