@@ -43,9 +43,10 @@ import { useAuth } from "@/lib/hooks/useAuth";
 
 const QUICK_SUGGESTIONS = [
   { text: "Launch a Memecoin", category: "NFTs", icon: Coin },
+  { text: "Transfer Funds", category: "Token", icon: Coin },
   { text: "List NFT", category: "NFTs", icon: ImageSquare },
   { text: "Create NFT Collection", category: "NFTs", icon: Images },
-  { text: "Swap tokens", category: "DeFi", icon: ArrowsLeftRight },
+  { text: "Play Rock Paper Scissors", category: "Gaming", icon: ArrowsLeftRight },
 ] as const;
 
 const CATEGORIES = [
