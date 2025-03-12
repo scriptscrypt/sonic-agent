@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { List, Broadcast } from "@phosphor-icons/react";
+import { List, Broadcast, Bridge } from "@phosphor-icons/react";
 import { AgentLogo } from "./AgentLogo";
 import {
   DropdownMenu,
@@ -150,7 +150,7 @@ const ProfileDropdown = ({ user, logout, router }: ProfileDropdownProps) => {
         <div className="py-1">
           <DropdownMenuItem asChild>
             <Link href="https://bridge.sonic.game/" target="_blank" rel="noopener noreferrer" className="flex items-center">
-              <span className="mr-2 h-4 w-4 flex items-center justify-center">🌉</span>
+             <Bridge className="mr-2 h-4 w-4" />
               <span>Bridge</span>
             </Link>
           </DropdownMenuItem>

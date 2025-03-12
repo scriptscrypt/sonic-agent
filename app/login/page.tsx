@@ -18,9 +18,9 @@ export default function LoginPage() {
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-16 sm:py-32">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Welcome to Sonic Chat</h1>
+          <h1 className="text-3xl font-bold">Welcome to Espio</h1>
           <p className="mt-2 text-sm text-gray-500">
-            Sign in to start chatting with AI
+            Sign in to accelerate with Espio
           </p>
         </div>
 
