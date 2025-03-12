@@ -31,7 +31,7 @@ export function FundWalletModal({ isOpen, onClose, sonicAddress }: FundWalletMod
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[600px] w-[95vw] p-6">
         <DialogHeader>
           <DialogTitle>Fund your Sonic SVM Wallet</DialogTitle>
           <DialogDescription>
@@ -41,14 +41,15 @@ export function FundWalletModal({ isOpen, onClose, sonicAddress }: FundWalletMod
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">My Sonic SVM Address</label>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 p-2 rounded bg-muted text-sm font-mono">
+            <div className="flex items-center gap-2 flex-wrap">
+              <code className="flex-1 p-2 rounded bg-muted text-sm font-mono break-all min-w-[200px]">
                 {sonicAddress}
               </code>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => copyToClipboard(sonicAddress)}
+                className="shrink-0"
               >
                 <Copy className="h-4 w-4 mr-1" />
                 {isCopied ? "Copied!" : "Copy"}
@@ -59,7 +60,7 @@ export function FundWalletModal({ isOpen, onClose, sonicAddress }: FundWalletMod
             </p>
           </div>
           
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-2">
             <Button onClick={handleBridgeClick}>
               Go to Sonic Bridge
             </Button>
