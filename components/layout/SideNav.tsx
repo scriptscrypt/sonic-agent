@@ -207,7 +207,8 @@ export default function SideNav() {
                         "text-base sm:text-[18px] font-semibold",
                         "text-foreground",
                         "transition-all duration-300 ease-out",
-                        "group-hover:text-accent"
+                        "group-hover:text-accent",
+                        "logo-text"
                       )}
                     >
                       Espio

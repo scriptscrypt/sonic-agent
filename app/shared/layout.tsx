@@ -1,3 +1,4 @@
+import { AgentLogo } from "@/components/layout/AgentLogo";
 import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -18,18 +19,16 @@ export default function SharedLayout({
         <div className="container mx-auto max-w-4xl flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-              <span className="text-accent font-semibold">E</span>
+              <span className="text-accent font-semibold">
+                <AgentLogo />
+              </span>
             </div>
             <span className="font-semibold">Espio</span>
           </div>
-          <div className="text-sm text-muted-foreground">
-            Shared Chat View
-          </div>
+          <div className="text-sm text-muted-foreground">Shared Chat View</div>
         </div>
       </div>
-      <div className="pt-16">
-        {children}
-      </div>
+      <div className="pt-16">{children}</div>
     </div>
   );
-} 
+}

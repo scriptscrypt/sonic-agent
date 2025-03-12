@@ -54,7 +54,7 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
           {/* Desktop-only Logo - hidden on mobile */}
           <div className="hidden md:flex items-center cursor-pointer" onClick={() => router.push("/")}>
             <AgentLogo />
-            <h1 className="text-base font-semibold ml-2">Espio</h1>
+            <h1 className="text-base font-semibold ml-2 logo-text">Espio</h1>
           </div>
         </div>
         
@@ -62,7 +62,7 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
         <div className="md:hidden absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <div className="flex items-center cursor-pointer" onClick={() => router.push("/")}>
             <AgentLogo />
-            <h1 className="text-base font-semibold ml-2">Espio</h1>
+            <h1 className="text-base font-semibold ml-2 logo-text">Espio</h1>
           </div>
         </div>
         

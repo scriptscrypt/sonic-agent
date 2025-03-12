@@ -18,9 +18,35 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Espio",
-  description: "Espio",
+  title: 'Espio',
+  description: 'The Token Copilot for Sonic',
+  keywords: ['solana', 'hackathon', 'ai', 'Espio'],
+  authors: [{ name: 'Espio', url: 'https://www.espio.fun' }],
+  openGraph: {
+    title: 'Espio',
+    description: 'The Token Copilot for Sonic',
+    url: 'https://espio.fun',
+    siteName: "Espio",
+    images: [
+      {
+        url: '/og.png',
+        width: 1200,
+        height: 630,
+        alt: 'Espio',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Espio',
+    description: 'The Token Copilot for Sonic',
+    images: ['/og.png'],
+  },
+  metadataBase: new URL('https://espio.fun'),
 };
+
 
 export default function RootLayout({
   children,

@@ -50,24 +50,24 @@ const QUICK_SUGGESTIONS = [
 
 const CATEGORIES = [
   { id: "all", name: "All", title: "All Integrations" },
-  { id: "defi", name: "DeFi", title: "Decentralized Finance" },
+  // { id: "defi", name: "DeFi", title: "Decentralized Finance" },
   { id: "nfts", name: "NFTs", title: "NFT Tools" },
   { id: "token", name: "Token", title: "Token Management" },
-  { id: "data", name: "Data", title: "Data & Analytics" },
-  { id: "infrastructure", name: "Infrastructure", title: "Infrastructure" },
+  // { id: "data", name: "Data", title: "Data & Analytics" },
+  // { id: "infrastructure", name: "Infrastructure", title: "Infrastructure" },
 ] as const;
 
 type CategoryId = (typeof CATEGORIES)[number]["id"];
 
 const SUGGESTIONS = [
-  {
-    title: "Launch Token",
-    description: "Create a memecoin on pump.fun",
-    logo: PumpFunLogo,
-    category: "token",
-    prompt:
-      "Help me create a new memecoin on pump.fun with the following specifications: token name, supply, and initial liquidity pool setup.",
-  },
+  // {
+  //   title: "Launch Token",
+  //   description: "Create a memecoin on pump.fun",
+  //   logo: PumpFunLogo,
+  //   category: "token",
+  //   prompt:
+  //     "Help me create a new memecoin on pump.fun with the following specifications: token name, supply, and initial liquidity pool setup.",
+  // },
   {
     title: "NFT Management",
     description:
@@ -78,69 +78,78 @@ const SUGGESTIONS = [
       "I want to create an NFT collection using Metaplex. Guide me through the process of setting up metadata, royalties, and deployment.",
   },
   {
-    title: "Jupiter Exchange",
-    description: "Execute token swaps using Jupiter Exchange for best rates",
-    logo: JupiterLogo,
-    category: "defi",
-    prompt:
-      "I want to swap 100 USDC for SOL using Jupiter Exchange. Guide me through the process of setting up the swap and providing the necessary parameters.",
-  },
-  {
-    title: "Sollayer",
-    description: "Explore and interact with Solana's Layer 2 solutions",
-    logo: SollayerLogo,
-    category: "infrastructure",
-    prompt:
-      "I want to explore Solana's Layer 2 solutions. Provide me with information on the latest developments and how to interact with them.",
-  },
-  {
-    title: "Manifest",
-    description: "Create and manage xNFTs for your dApp",
-    logo: ManifestLogo,
-    category: "nfts",
-    prompt:
-      "I want to create an xNFT collection using Manifest. Guide me through the process of setting up metadata, royalties, and deployment.",
-  },
-  {
-    title: "Compressed Airdrops",
-    description: "Send Zk compressed airdrops using Light Protocol and Helius",
-    logo: LightProtocolLogo,
+    title: "Token Management",
+    description:
+      "Create and manage tokens on Sonic via Metaplex",
+    logo: MetaplexLogo,
     category: "token",
     prompt:
-      "I want to send a Zk compressed airdrop using Light Protocol and Helius. Guide me through the process of setting up the airdrop and providing the necessary parameters.",
+      "I want to create an NFT collection using Metaplex. Guide me through the process of setting up metadata, royalties, and deployment.",
   },
-  {
-    title: "Price Feeds",
-    description: "Fetch real-time asset prices using Pyth Network",
-    logo: PythLogo,
-    category: "data",
-    prompt:
-      "I want to fetch real-time asset prices using Pyth Network. Provide me with information on the latest prices and how to interact with them.",
-  },
-  {
-    title: "DexScreener",
-    description: "Track real-time DEX trading data and market analytics",
-    logo: DexScreenerLogo,
-    category: "data",
-    prompt:
-      "I want to track real-time DEX trading data and market analytics. Provide me with information on the latest trading data and how to interact with them.",
-  },
-  {
-    title: "Raydium Pools",
-    description: "Create liquidity pools (CPMM, CLMM, AMMv4) on Raydium",
-    logo: RaydiumLogo,
-    category: "defi",
-    prompt:
-      "I want to create liquidity pools (CPMM, CLMM, AMMv4) on Raydium. Guide me through the process of setting up the pools and providing the necessary parameters.",
-  },
-  {
-    title: "Lending by Lulo",
-    description: "Access best APR for USDC lending via Lulo protocol",
-    logo: LuloLogo,
-    category: "defi",
-    prompt:
-      "I want to access best APR for USDC lending via Lulo protocol. Provide me with information on the latest lending rates and how to interact with them.",
-  },
+  // {
+  //   title: "Jupiter Exchange",
+  //   description: "Execute token swaps using Jupiter Exchange for best rates",
+  //   logo: JupiterLogo,
+  //   category: "defi",
+  //   prompt:
+  //     "I want to swap 100 USDC for SOL using Jupiter Exchange. Guide me through the process of setting up the swap and providing the necessary parameters.",
+  // },
+  // {
+  //   title: "Sollayer",
+  //   description: "Explore and interact with Solana's Layer 2 solutions",
+  //   logo: SollayerLogo,
+  //   category: "infrastructure",
+  //   prompt:
+  //     "I want to explore Solana's Layer 2 solutions. Provide me with information on the latest developments and how to interact with them.",
+  // },
+  // {
+  //   title: "Manifest",
+  //   description: "Create and manage xNFTs for your dApp",
+  //   logo: ManifestLogo,
+  //   category: "nfts",
+  //   prompt:
+  //     "I want to create an xNFT collection using Manifest. Guide me through the process of setting up metadata, royalties, and deployment.",
+  // },
+  // {
+  //   title: "Compressed Airdrops",
+  //   description: "Send Zk compressed airdrops using Light Protocol and Helius",
+  //   logo: LightProtocolLogo,
+  //   category: "token",
+  //   prompt:
+  //     "I want to send a Zk compressed airdrop using Light Protocol and Helius. Guide me through the process of setting up the airdrop and providing the necessary parameters.",
+  // },
+  // {
+  //   title: "Price Feeds",
+  //   description: "Fetch real-time asset prices using Pyth Network",
+  //   logo: PythLogo,
+  //   category: "data",
+  //   prompt:
+  //     "I want to fetch real-time asset prices using Pyth Network. Provide me with information on the latest prices and how to interact with them.",
+  // },
+  // {
+  //   title: "DexScreener",
+  //   description: "Track real-time DEX trading data and market analytics",
+  //   logo: DexScreenerLogo,
+  //   category: "data",
+  //   prompt:
+  //     "I want to track real-time DEX trading data and market analytics. Provide me with information on the latest trading data and how to interact with them.",
+  // },
+  // {
+  //   title: "Raydium Pools",
+  //   description: "Create liquidity pools (CPMM, CLMM, AMMv4) on Raydium",
+  //   logo: RaydiumLogo,
+  //   category: "defi",
+  //   prompt:
+  //     "I want to create liquidity pools (CPMM, CLMM, AMMv4) on Raydium. Guide me through the process of setting up the pools and providing the necessary parameters.",
+  // },
+  // {
+  //   title: "Lending by Lulo",
+  //   description: "Access best APR for USDC lending via Lulo protocol",
+  //   logo: LuloLogo,
+  //   category: "defi",
+  //   prompt:
+  //     "I want to access best APR for USDC lending via Lulo protocol. Provide me with information on the latest lending rates and how to interact with them.",
+  // },
   {
     title: "Arcade Games",
     description: "Send and interact with Solana Arcade Games",
@@ -149,63 +158,63 @@ const SUGGESTIONS = [
     prompt:
       "I want to send and interact with Solana Arcade Games. Provide me with information on the latest games and how to interact with them.",
   },
-  {
-    title: "AI Integration",
-    description: "LangChain tools, Vercel AI SDK, and autonomous agent support",
-    logo: AILogo,
-    category: "development",
-    prompt:
-      "I want to use LangChain tools, Vercel AI SDK, and autonomous agent support. Provide me with information on the latest tools and how to interact with them.",
-  },
-  {
-    title: "Meteora DAMM",
-    description:
-      "Dynamic Automated Market Maker for efficient liquidity provision",
-    logo: MeteoraLogo,
-    category: "defi",
-    prompt:
-      "I want to use Dynamic Automated Market Maker for efficient liquidity provision. Provide me with information on the latest tools and how to interact with them.",
-  },
-  {
-    title: "Dialect Chat",
-    description: "Integrate web3 messaging and notifications for your dApp",
-    logo: DialectLogo,
-    category: "social",
-    prompt:
-      "I want to integrate web3 messaging and notifications for my dApp. Provide me with information on the latest tools and how to interact with them.",
-  },
-  {
-    title: "Domain Services",
-    description: "Register and resolve SNS domains and Alldomains",
-    logo: SNSLogo,
-    category: "infrastructure",
-    prompt:
-      "I want to register and resolve SNS domains and Alldomains. Provide me with information on the latest tools and how to interact with them.",
-  },
-  {
-    title: "Jito Features",
-    description: "Jito Bundles and JupSOL staking integration",
-    logo: JitoLogo,
-    category: "infrastructure",
-    prompt:
-      "I want to use Jito Bundles and JupSOL staking integration. Provide me with information on the latest tools and how to interact with them.",
-  },
-  {
-    title: "Tensor Trading",
-    description: "Trade NFTs with advanced analytics and real-time data",
-    logo: TensorLogo,
-    category: "nfts",
-    prompt:
-      "I want to trade NFTs with advanced analytics and real-time data. Provide me with information on the latest tools and how to interact with them.",
-  },
-  {
-    title: "Magic Eden",
-    description: "List and trade NFTs on the largest Solana marketplace",
-    logo: MagicEdenLogo,
-    category: "nfts",
-    prompt:
-      "I want to list and trade NFTs on the largest Solana marketplace. Provide me with information on the latest tools and how to interact with them.",
-  },
+  // {
+  //   title: "AI Integration",
+  //   description: "LangChain tools, Vercel AI SDK, and autonomous agent support",
+  //   logo: AILogo,
+  //   category: "development",
+  //   prompt:
+  //     "I want to use LangChain tools, Vercel AI SDK, and autonomous agent support. Provide me with information on the latest tools and how to interact with them.",
+  // },
+  // {
+  //   title: "Meteora DAMM",
+  //   description:
+  //     "Dynamic Automated Market Maker for efficient liquidity provision",
+  //   logo: MeteoraLogo,
+  //   category: "defi",
+  //   prompt:
+  //     "I want to use Dynamic Automated Market Maker for efficient liquidity provision. Provide me with information on the latest tools and how to interact with them.",
+  // },
+  // {
+  //   title: "Dialect Chat",
+  //   description: "Integrate web3 messaging and notifications for your dApp",
+  //   logo: DialectLogo,
+  //   category: "social",
+  //   prompt:
+  //     "I want to integrate web3 messaging and notifications for my dApp. Provide me with information on the latest tools and how to interact with them.",
+  // },
+  // {
+  //   title: "Domain Services",
+  //   description: "Register and resolve SNS domains and Alldomains",
+  //   logo: SNSLogo,
+  //   category: "infrastructure",
+  //   prompt:
+  //     "I want to register and resolve SNS domains and Alldomains. Provide me with information on the latest tools and how to interact with them.",
+  // },
+  // {
+  //   title: "Jito Features",
+  //   description: "Jito Bundles and JupSOL staking integration",
+  //   logo: JitoLogo,
+  //   category: "infrastructure",
+  //   prompt:
+  //     "I want to use Jito Bundles and JupSOL staking integration. Provide me with information on the latest tools and how to interact with them.",
+  // },
+  // {
+  //   title: "Tensor Trading",
+  //   description: "Trade NFTs with advanced analytics and real-time data",
+  //   logo: TensorLogo,
+  //   category: "nfts",
+  //   prompt:
+  //     "I want to trade NFTs with advanced analytics and real-time data. Provide me with information on the latest tools and how to interact with them.",
+  // },
+  // {
+  //   title: "Magic Eden",
+  //   description: "List and trade NFTs on the largest Solana marketplace",
+  //   logo: MagicEdenLogo,
+  //   category: "nfts",
+  //   prompt:
+  //     "I want to list and trade NFTs on the largest Solana marketplace. Provide me with information on the latest tools and how to interact with them.",
+  // },
 ] as const;
 
 interface ChatcompProps {
