@@ -11,11 +11,14 @@ import { Copy } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Token } from '@/db/schema';
+import { TokenDetailSheet } from '@/components/TokenDetailSheet';
 
 export default function FeedPage() {
   const { data: nfts, isLoading: nftsLoading, error: nftsError } = useNFTs();
   const { data: tokens, isLoading: tokensLoading, error: tokensError } = useTokens();
   const [isCopied, setIsCopied] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+  const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -26,6 +29,11 @@ export default function FeedPage() {
   const truncateAddress = (address: string) => {
     if (!address) return '';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const handleTokenClick = (token: Token) => {
+    setSelectedToken(token);
+    setIsDetailSheetOpen(true);
   };
 
   return (
@@ -68,6 +76,7 @@ export default function FeedPage() {
                       copyToClipboard={copyToClipboard}
                       truncateAddress={truncateAddress}
                       isCopied={isCopied}
+                      onClick={() => handleTokenClick(token)}
                     />
                   ))}
                 </div>
@@ -127,6 +136,7 @@ export default function FeedPage() {
                     copyToClipboard={copyToClipboard}
                     truncateAddress={truncateAddress}
                     isCopied={isCopied}
+                    onClick={() => handleTokenClick(token)}
                   />
                 ))}
               </div>
@@ -164,6 +174,13 @@ export default function FeedPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Token Detail Sheet */}
+      <TokenDetailSheet 
+        token={selectedToken} 
+        isOpen={isDetailSheetOpen} 
+        onOpenChange={setIsDetailSheetOpen} 
+      />
     </div>
   );
 }
@@ -174,11 +191,15 @@ interface TokenCardProps {
   copyToClipboard: (text: string) => void;
   truncateAddress: (address: string) => string;
   isCopied: boolean;
+  onClick: () => void;
 }
 
-function TokenCard({ token, copyToClipboard, truncateAddress, isCopied }: TokenCardProps) {
+function TokenCard({ token, copyToClipboard, truncateAddress, isCopied, onClick }: TokenCardProps) {
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card 
+      className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+      onClick={onClick}
+    >
       <CardHeader className="p-4 pb-2">
         <div className="flex justify-between items-start">
           <div>
@@ -212,7 +233,10 @@ function TokenCard({ token, copyToClipboard, truncateAddress, isCopied }: TokenC
             variant="ghost"
             size="sm"
             className="h-8 px-2 text-xs"
-            onClick={() => copyToClipboard(token.mintAddress || '')}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click event
+              copyToClipboard(token.mintAddress || '');
+            }}
           >
             <Copy size={12} className="mr-1" />
             {isCopied ? 'Copied!' : 'Copy'}
