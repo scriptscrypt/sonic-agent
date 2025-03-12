@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SideNav() {
   const [selectedConversation, setSelectedConversation] = useState<
@@ -139,6 +140,18 @@ export default function SideNav() {
       }
     }
   };
+
+  function SessionsSkeleton() {
+    return (
+      <div className="space-y-1 py-1">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="px-2 py-2">
+            <Skeleton className="h-5 w-full" />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -289,17 +302,15 @@ export default function SideNav() {
                 </div>
               </div>
               <div className="px-3 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40">
-                <div className="space-y-1 py-1">
-                  {isSessionsLoading ? (
-                    <div className="text-center py-4 text-sm text-muted-foreground">
-                      Loading sessions...
-                    </div>
-                  ) : sessions.length === 0 ? (
-                    <div className="text-center py-4 text-sm text-muted-foreground">
-                      No sessions yet
-                    </div>
-                  ) : (
-                    sessions.map((item) => (
+                {isSessionsLoading ? (
+                  <SessionsSkeleton />
+                ) : sessions.length === 0 ? (
+                  <div className="text-center py-4 text-sm text-muted-foreground">
+                    No sessions yet
+                  </div>
+                ) : (
+                  <div className="space-y-1 py-1">
+                    {sessions.map((item) => (
                       <div key={item.id} className="relative">
                         {renameSessionId === item.id ? (
                           <form
@@ -408,9 +419,9 @@ export default function SideNav() {
                           </Button>
                         )}
                       </div>
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

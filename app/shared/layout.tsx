@@ -25,7 +25,7 @@ export default function SharedLayout({
             </div>
             <span className="font-semibold">Espio</span>
           </div>
-          <div className="text-sm text-muted-foreground">Shared Chat View</div>
+          <div className="text-sm text-muted-foreground">Shared Chat</div>
         </div>
       </div>
       <div className="pt-16">{children}</div>

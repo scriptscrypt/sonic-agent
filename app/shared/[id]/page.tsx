@@ -8,6 +8,7 @@ import { ChatMessage } from "@/db/schema";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SharedChatSession {
   id: number;
@@ -22,6 +23,32 @@ interface SharedChatSession {
 interface SharedChatPageProps {
   session: SharedChatSession;
   messages: ChatMessage[];
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-4xl mt-4">
+      <div className="bg-card rounded-lg shadow-lg overflow-hidden">
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-4 w-1/4" />
+          </div>
+          <div className="mt-2">
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+        <div className="p-6 space-y-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function SharedChatPage() {
@@ -71,14 +98,7 @@ export default function SharedChatPage() {
   }, [params.id, user]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading shared chat...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (error) {

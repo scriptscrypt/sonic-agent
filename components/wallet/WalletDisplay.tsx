@@ -5,9 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Copy, Plus } from "@phosphor-icons/react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface WalletDisplayProps {
   className?: string;
+}
+
+function WalletSkeleton() {
+  return (
+    <div className="p-4 bg-secondary/20 rounded-lg space-y-3">
+      <Skeleton className="h-6 w-1/3" />
+      <Skeleton className="h-4 w-2/3" />
+      <Skeleton className="h-10 w-full" />
+    </div>
+  );
 }
 
 export function WalletDisplay({ className }: WalletDisplayProps) {
@@ -34,8 +45,8 @@ export function WalletDisplay({ className }: WalletDisplayProps) {
 
   if (isLoading) {
     return (
-      <div className={cn("p-4 bg-secondary/20 rounded-lg", className)}>
-        Loading wallet information...
+      <div className={cn("", className)}>
+        <WalletSkeleton />
       </div>
     );
   }
