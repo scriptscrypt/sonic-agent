@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Copy, Plus } from '@phosphor-icons/react';
 import { useWalletContext } from '@/app/providers/WalletProvider';
 import { FundWalletModal } from '@/components/modals/FundWalletModal';
+import { usePrivy } from '@privy-io/react-auth';
+import { Connection, PublicKey } from '@solana/web3.js';
 
 export function SonicWallet() {
   const { user } = useAuth();
@@ -13,19 +15,33 @@ export function SonicWallet() {
   const [isCopied, setIsCopied] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [showFundModal, setShowFundModal] = useState(false);
-  const [balance, setBalance] = useState(0); // We'll simulate 0 balance for now
+  const [balance, setBalance] = useState<number | null>(null);
 
-  // Find the Solana wallet from the wallets list
-  const solanaWallet = wallets.find(wallet => wallet.name === 'Default Agent Wallet');
-  const hasWallet = !!solanaWallet;
-  const walletAddress = solanaWallet?.address || null;
-
-  // Show fund modal if balance is 0 and wallet exists
+  const walletAddress = user?.walletAddress
+  const hasWallet = walletAddress !== null;
+  // Fetch balance when wallet address is available
   useEffect(() => {
-    if (hasWallet && balance === 0) {
-      setShowFundModal(true);
-    }
-  }, [hasWallet, balance]);
+    const fetchBalance = async () => {
+      if (!walletAddress) return;
+
+      try {
+        const connection = new Connection('https://api.mainnet-beta.solana.com');
+        const pubKey = new PublicKey(walletAddress);
+        const balance = await connection.getBalance(pubKey);
+        setBalance(balance / 1e9); // Convert lamports to SOL
+        
+        // Show fund modal if balance is 0
+        if (balance === 0) {
+          setShowFundModal(true);
+        }
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+        setBalance(0);
+      }
+    };
+
+    fetchBalance();
+  }, [walletAddress]);
 
   const generateWallet = async () => {
     if (!user?.privyId) return;
@@ -72,7 +88,9 @@ export function SonicWallet() {
             <p className="text-sm font-mono truncate">{walletAddress}</p>
             <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/40">
               <span className="text-sm text-muted-foreground">Balance:</span>
-              <span className="text-sm font-medium">{balance} SVM</span>
+              <span className="text-sm font-medium">
+                {balance === null ? 'Loading...' : `${balance.toFixed(4)} SOL`}
+              </span>
             </div>
             {balance === 0 && (
               <Button
