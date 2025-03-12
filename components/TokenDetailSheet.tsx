@@ -515,7 +515,7 @@ export function TokenDetailSheet({
                       <div className="flex justify-between items-center">
                         <Button variant="outline" size="sm" className="w-full h-8">
                           <Wallet size={14} className="mr-2" />
-                          Add to Wallet
+                          Add to Watchlist
                         </Button>
                       </div>
                     </div>

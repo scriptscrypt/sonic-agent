@@ -41,9 +41,12 @@ function TradingViewWidgetComponent({
   useEffect(() => {
     if (!container.current) return;
     
+    // Store a reference to the current container element
+    const currentContainer = container.current;
+    
     // Clear the container first
-    while (container.current.firstChild) {
-      container.current.removeChild(container.current.firstChild);
+    while (currentContainer.firstChild) {
+      currentContainer.removeChild(currentContainer.firstChild);
     }
     
     // Create iframe
@@ -56,12 +59,13 @@ function TradingViewWidgetComponent({
     iframe.style.height = '100%';
     iframe.style.display = 'block';
     
-    container.current.appendChild(iframe);
+    currentContainer.appendChild(iframe);
     
     return () => {
-      if (container.current) {
-        while (container.current.firstChild) {
-          container.current.removeChild(container.current.firstChild);
+      // Use the captured reference in the cleanup function
+      if (currentContainer) {
+        while (currentContainer.firstChild) {
+          currentContainer.removeChild(currentContainer.firstChild);
         }
       }
     };
