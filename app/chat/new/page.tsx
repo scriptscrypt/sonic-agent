@@ -5,7 +5,7 @@ import { Suspense } from "react";
 
 export default function NewChatPage() {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full mt-4">
       <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
         <Chatcomp />
       </Suspense>

@@ -4,9 +4,12 @@ import { chatSessionsRepository } from "@/db/repositories/chatRepository";
 // GET a specific chat session
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    // Properly await the params object
+    const params = await Promise.resolve(context.params);
+    
     if (!params || !params.id) {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
@@ -20,7 +23,7 @@ export async function GET(
     const session = await chatSessionsRepository.getSessionById(sessionId);
     
     if (!session) {
-      return NextResponse.json({ error: "Chat session not found" }, { status: 404 });
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
     
     return NextResponse.json(session);
@@ -33,9 +36,12 @@ export async function GET(
 // PUT update a chat session
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    // Properly await the params object
+    const params = await Promise.resolve(context.params);
+    
     if (!params || !params.id) {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
@@ -46,18 +52,18 @@ export async function PUT(
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
     
-    const requestData = await req.json();
-    const { title, modelName, modelSubText, isShared } = requestData;
+    const data = await req.json();
     
-    const updatedSession = await chatSessionsRepository.updateSession(sessionId, {
-      title,
-      modelName,
-      modelSubText,
-      isShared,
-    });
+    // Validate required fields
+    if (!data) {
+      return NextResponse.json({ error: "No data provided" }, { status: 400 });
+    }
+    
+    // Update the session
+    const updatedSession = await chatSessionsRepository.updateSession(sessionId, data);
     
     if (!updatedSession) {
-      return NextResponse.json({ error: "Chat session not found" }, { status: 404 });
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
     
     return NextResponse.json(updatedSession);
@@ -70,9 +76,12 @@ export async function PUT(
 // DELETE a chat session
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    // Properly await the params object
+    const params = await Promise.resolve(context.params);
+    
     if (!params || !params.id) {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
@@ -83,9 +92,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
     
-    await chatSessionsRepository.deleteSession(sessionId);
+    const success = await chatSessionsRepository.deleteSession(sessionId);
     
-    return NextResponse.json({ message: "Chat session deleted successfully" });
+    if (!success) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+    
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting chat session:", error);
     return NextResponse.json({ error: "Failed to delete chat session" }, { status: 500 });

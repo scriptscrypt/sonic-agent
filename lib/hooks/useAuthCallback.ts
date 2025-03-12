@@ -1,6 +1,7 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useRef, useCallback } from 'react';
+import { generateRandomUsername } from '@/lib/utils';
 
 export function useAuthCallback() {
   const { ready, authenticated, user } = usePrivy();
@@ -23,8 +24,34 @@ export function useAuthCallback() {
         email = user.email.address;
       }
 
+      // First, check if the user already exists
+      const checkResponse = await fetch(`/api/auth/user?privyId=${user.id}`);
+      const userExists = checkResponse.status !== 404;
+      
+      // Generate a random username for new users
+      let username;
+      if (!userExists) {
+        username = generateRandomUsername();
+        
+        // Ensure the username is unique
+        let isUnique = false;
+        let attempts = 0;
+        
+        while (!isUnique && attempts < 5) {
+          const availabilityResponse = await fetch(`/api/auth/username?username=${encodeURIComponent(username)}`);
+          const availabilityData = await availabilityResponse.json();
+          
+          if (availabilityData.available) {
+            isUnique = true;
+          } else {
+            username = generateRandomUsername();
+            attempts++;
+          }
+        }
+      }
+
       // Create or update user in our database
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,6 +60,7 @@ export function useAuthCallback() {
           privyId: user.id,
           walletAddress,
           email,
+          username, // Only included for new users
         }),
       });
 

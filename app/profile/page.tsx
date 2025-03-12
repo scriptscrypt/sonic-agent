@@ -134,7 +134,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container max-w-4xl py-10">
+    <div className="container max-w-4xl py-10 mt-4">
       <h1 className="text-3xl font-bold mb-6">Profile Settings</h1>
       
       {notification && (
@@ -187,7 +187,10 @@ export default function ProfilePage() {
                 {!isChecking && isAvailable === false && <p className="text-sm text-destructive">Username is already taken</p>}
                 {!isChecking && isAvailable === true && <p className="text-sm text-green-500">Username is available</p>}
                 <p className="text-sm text-muted-foreground">
-                  Your profile URL: {username ? `yourdomain.com/${username}` : 'Set a username to get a custom URL'}
+                  Your profile URL: {username ? `${window.location.origin}/${username}` : 'Set a username to get a custom URL'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  A random username was generated for you when you signed up. You can change it here.
                 </p>
               </div>
               

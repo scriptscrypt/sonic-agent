@@ -224,22 +224,7 @@ export default function SideNav() {
 					{/* Custom Divider */}
 					<div className="h-[1px] w-full bg-border/50 shrink-0" />
 
-					{/* Navigation Links */}
-					{(isExpanded || (!isExpanded && isMobile)) && (
-						<div className="px-3 space-y-1">
-							<Button
-								variant="ghost"
-								className={cn(
-									"w-full justify-start",
-									!isExpanded && "md:justify-center"
-								)}
-								onClick={() => router.push("/feed")}
-							>
-								<Broadcast size={18} className="mr-2" />
-								<span>Feed</span>
-							</Button>
-						</div>
-					)}
+					{/* Navigation Links - Removed Feed link as it's now in the navbar */}
 
 					{/* Custom Divider */}
 					<div className="h-[1px] w-full bg-border/50 shrink-0" />

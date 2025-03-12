@@ -3,9 +3,11 @@ import { userRepository } from '@/db/repositories/userRepository';
 
 export async function GET(
   request: NextRequest,
-  { params }: any
+  context: { params: { id: string } }
 ) {
   try {
+    // Properly await the params object
+    const params = await Promise.resolve(context.params);
     const id = parseInt(params.id);
     
     if (isNaN(id)) {

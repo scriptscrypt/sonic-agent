@@ -104,7 +104,7 @@ export default function SharedChatPage() {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-4xl mt-4">
         <div className="bg-card rounded-lg shadow-lg overflow-hidden">
           <div className="p-6 border-b border-border">
             <div className="flex items-center justify-between">

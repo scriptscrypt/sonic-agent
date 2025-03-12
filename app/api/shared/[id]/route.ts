@@ -4,9 +4,12 @@ import { chatSessionsRepository, chatMessagesRepository } from "@/db/repositorie
 // GET a shared chat session
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    // Properly await the params object
+    const params = await Promise.resolve(context.params);
+    
     if (!params || !params.id) {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }

@@ -11,7 +11,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     <div className="fixed inset-0 bg-background flex">
       {!isSharedRoute && <SideNav />}
       <main className={`flex-1 relative overflow-y-auto scrollbar-none scroll-smooth ${isSharedRoute ? 'ml-0' : ''}`}>
-        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8">{children}</div>
+        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-16 md:pt-16">{children}</div>
       </main>
     </div>
   );

@@ -9,7 +9,7 @@ function ChatPageContent({ sessionId }: { sessionId: number }) {
   const { data: session, isLoading, error } = useChatSession(sessionId);
   
   if (isLoading) {
-    return <div className="p-4 text-center">Loading session...</div>;
+    return <div className="p-4 text-center mt-4">Loading session...</div>;
   }
   
   if (error || !session) {
@@ -28,7 +28,7 @@ export default function ChatPage() {
   }
   
   return (
-    <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+    <Suspense fallback={<div className="p-4 text-center mt-4">Loading...</div>}>
       <ChatPageContent sessionId={sessionId} />
     </Suspense>
   );

@@ -3,10 +3,12 @@ import { userRepository } from '@/db/repositories/userRepository';
 
 export async function GET(
   request: NextRequest,
-  { params }: any
+  context: { params: { username: string } }
 ) {
   try {
-    const { username } = params;
+    // Properly await the params object
+    const params = await Promise.resolve(context.params);
+    const username = params.username;
     
     if (!username) {
       return NextResponse.json(

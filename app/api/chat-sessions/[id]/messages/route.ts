@@ -4,9 +4,12 @@ import { chatSessionsRepository, chatMessagesRepository } from "@/db/repositorie
 // GET all messages for a chat session
 export async function GET(
   req: NextRequest,
-  { params }: any
+  context: { params: { id: string } }
 ) {
   try {
+    // Properly await the params object
+    const params = await Promise.resolve(context.params);
+    
     if (!params || !params.id) {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
@@ -21,7 +24,7 @@ export async function GET(
     const session = await chatSessionsRepository.getSessionById(sessionId);
     
     if (!session) {
-      return NextResponse.json({ error: "Chat session not found" }, { status: 404 });
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
     
     const messages = await chatMessagesRepository.getMessagesBySessionId(sessionId);
@@ -33,12 +36,15 @@ export async function GET(
   }
 }
 
-// POST create a new message in a chat session
+// POST a new message to a chat session
 export async function POST(
   req: NextRequest,
-  { params }: any
+  context: { params: { id: string } }
 ) {
   try {
+    // Properly await the params object
+    const params = await Promise.resolve(context.params);
+    
     if (!params || !params.id) {
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
@@ -53,10 +59,11 @@ export async function POST(
     const session = await chatSessionsRepository.getSessionById(sessionId);
     
     if (!session) {
-      return NextResponse.json({ error: "Chat session not found" }, { status: 404 });
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
     
-    const { content, role } = await req.json();
+    const data = await req.json();
+    const { content, role } = data;
     
     if (!content || !role) {
       return NextResponse.json({ error: "Content and role are required" }, { status: 400 });

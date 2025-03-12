@@ -18,9 +18,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useParams } from "next/navigation";
 
-export default function UserProfilePage({ params }: any) {
-  const { username } = params;
+export default function UserProfilePage() {
+  // Use the useParams hook to get the params object
+  const params = useParams();
+  const username = params.username as string;
+  
   const { data: nfts, isLoading: isNFTsLoading } = useUsernameNFTs(username);
   const { data: tokens, isLoading: isTokensLoading } =
     useUsernameTokens(username);
@@ -30,6 +34,11 @@ export default function UserProfilePage({ params }: any) {
 
   useEffect(() => {
     const fetchUser = async () => {
+      if (!username) {
+        setIsUserLoading(false);
+        return;
+      }
+      
       try {
         setIsUserLoading(true);
         const response = await fetch(`/api/users/username/${username}`);
@@ -61,7 +70,7 @@ export default function UserProfilePage({ params }: any) {
   };
 
   return (
-    <div className="container py-8">
+    <div className="container py-8 mt-4">
       <div className="flex flex-col gap-8">
         {/* Profile Header */}
         <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">

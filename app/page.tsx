@@ -8,14 +8,14 @@ import { Suspense, useEffect } from "react";
 function HomeContent() {
   const { data: sessions, isLoading } = useChatSessions();
   if (isLoading) {
-    return <div className="p-4 text-center">Loading...</div>;
+    return <div className="p-4 text-center mt-4">Loading...</div>;
   }
-  return <Chatcomp />;
+  return <div className="mt-4"><Chatcomp /></div>;
 }
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+    <Suspense fallback={<div className="p-4 text-center mt-4">Loading...</div>}>
       <HomeContent />
     </Suspense>
   );

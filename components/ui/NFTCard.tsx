@@ -31,8 +31,6 @@ export function NFTCard({ nft, showOwner = false, username }: NFTCardProps) {
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <div className="relative aspect-square overflow-hidden">
         <Image
-          width={100}
-          height={100}
           src={nft.imageUrl}
           alt={nft.name}
           fill

@@ -1,18 +1,77 @@
 import { Button } from "@/components/ui/button";
-import { List } from "@phosphor-icons/react";
+import { List, Broadcast } from "@phosphor-icons/react";
+import { AgentLogo } from "./AgentLogo";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { User, SignOut, GearSix, Globe, Book } from "@phosphor-icons/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface MobileNavProps {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (value: boolean) => void;
 }
 
+// Define the type for the user object based on what's available in useAuth
+interface UserType {
+  id?: number;
+  email?: string;
+  walletAddress?: string;
+  username?: string;
+  [key: string]: any; // For any other properties
+}
+
+// Define props interface for ProfileDropdown
+interface ProfileDropdownProps {
+  user: UserType | null;
+  logout: (() => void) | undefined;
+  router: ReturnType<typeof useRouter>;
+}
+
 export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavProps) => {
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
   return (
     <>
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-background z-50 flex items-center px-4 border-b border-border">
-        <Button variant="ghost" size="iconLg" active onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-          <List size={26} weight="bold" />
-        </Button>
+      {/* Unified Navbar for both mobile and desktop */}
+      <div className="fixed top-0 left-0 right-0 h-16 bg-background z-50 flex items-center justify-between px-4 border-b border-border">
+        {/* Left section: Hamburger menu (mobile only) and Logo */}
+        <div className="flex items-center">
+          {/* Hamburger menu - only visible on mobile */}
+          <div className="md:hidden mr-4">
+            <Button variant="ghost" size="iconLg" active onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              <List size={26} weight="bold" />
+            </Button>
+          </div>
+          
+          {/* Logo */}
+          <div className="flex items-center cursor-pointer" onClick={() => router.push("/")}>
+            <AgentLogo />
+            <h1 className="text-base font-semibold ml-2">Espio</h1>
+          </div>
+        </div>
+        
+        {/* Center section: Navigation links (desktop only) */}
+        <div className="hidden md:flex items-center space-x-2">
+          <Button 
+            variant="ghost" 
+            className="flex items-center gap-2"
+            onClick={() => router.push("/feed")}
+          >
+            <Broadcast size={18} />
+            <span>Feed</span>
+          </Button>
+        </div>
+        
+        {/* Right section: User profile dropdown */}
+        <ProfileDropdown user={user} logout={logout} router={router} />
       </div>
 
       {/* Mobile Sidebar Overlay */}
@@ -23,5 +82,89 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
         />
       )}
     </>
+  );
+};
+
+// Extracted ProfileDropdown component to avoid duplication
+const ProfileDropdown = ({ user, logout, router }: ProfileDropdownProps) => {
+  // State to track if there's an error navigating to the public profile
+  const [hasProfileError, setHasProfileError] = useState(false);
+
+  // Reset error state when user changes
+  useEffect(() => {
+    setHasProfileError(false);
+  }, [user]);
+
+  const handleViewPublicProfile = async () => {
+    try {
+      // If user has a username, navigate to their public profile
+      if (user?.username) {
+        router.push(`/${user.username}`);
+      } else {
+        // If no username, redirect to profile page to set one
+        router.push('/profile');
+        // You could also show a toast notification here
+        console.log('Please set a username to view your public profile');
+      }
+    } catch (error) {
+      console.error('Error navigating to public profile:', error);
+      setHasProfileError(true);
+    }
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 bg-muted/50 hover:bg-muted">
+          <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary">
+            {user?.email ? user.email[0].toUpperCase() : "U"}
+          </div>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {/* Profile section */}
+        <div className="py-1">
+          <DropdownMenuItem onClick={handleViewPublicProfile}>
+            <Globe className="mr-2 h-4 w-4" />
+            <span>View public profile</span>
+            {!user?.username && (
+              <span className="ml-2 text-xs text-muted-foreground">(Set username first)</span>
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/profile")}>
+            <GearSix className="mr-2 h-4 w-4" />
+            <span>Profile settings</span>
+          </DropdownMenuItem>
+        </div>
+        
+        {/* Separator */}
+        <div className="h-px bg-border my-1"></div>
+        
+        {/* Links section */}
+        <div className="py-1">
+          <DropdownMenuItem asChild>
+            <Link href="https://bridge.sonic.game/" target="_blank" rel="noopener noreferrer" className="flex items-center">
+              <span className="mr-2 h-4 w-4 flex items-center justify-center">🌉</span>
+              <span>Bridge</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/guides")}>
+            <Book className="mr-2 h-4 w-4" />
+            <span>How to Guides</span>
+          </DropdownMenuItem>
+        </div>
+        
+        {/* Separator */}
+        <div className="h-px bg-border my-1"></div>
+        
+        {/* Sign out option */}
+        <div className="py-1">
+          <DropdownMenuItem onClick={() => logout && logout()}>
+            <SignOut className="mr-2 h-4 w-4" />
+            <span>Sign out</span>
+          </DropdownMenuItem>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
