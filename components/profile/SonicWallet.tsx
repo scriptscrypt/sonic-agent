@@ -25,13 +25,14 @@ export function SonicWallet() {
       if (!walletAddress) return;
 
       try {
-        const connection = new Connection('https://api.mainnet-beta.solana.com');
-        const pubKey = new PublicKey(walletAddress);
-        const balance = await connection.getBalance(pubKey);
-        setBalance(balance / 1e9); // Convert lamports to SOL
+        const response = await fetch(`/api/wallet/balance?address=${walletAddress}`);
+        if (!response.ok) throw new Error('Failed to fetch balances');
+        
+        const data = await response.json();
+        setBalance(data.sonic); // We only need Sonic balance here
         
         // Show fund modal if balance is 0
-        if (balance === 0) {
+        if (data.sonic === 0) {
           setShowFundModal(true);
         }
       } catch (error) {

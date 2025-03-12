@@ -54,8 +54,8 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
           </div>
           
           {/* Desktop-only Logo - hidden on mobile */}
-          <div className="hidden md:flex items-center cursor-pointer" onClick={() => router.push("/")}>
-            <AgentLogo />
+          <div className="hidden md:flex items-center cursor-pointer rounded-md" onClick={() => router.push("/")}>
+            <AgentLogo className="rounded-lg" />
             <h1 className="text-base font-semibold ml-2 logo-text">Espio</h1>
           </div>
         </div>
@@ -63,7 +63,7 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
         {/* Center section: Logo (mobile only) */}
         <div className="md:hidden absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <div className="flex items-center cursor-pointer" onClick={() => router.push("/")}>
-            <AgentLogo />
+            <AgentLogo className="rounded-lg" />
             <h1 className="text-base font-semibold ml-2 logo-text">Espio</h1>
           </div>
         </div>
@@ -110,8 +110,7 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
 const ProfileDropdown = ({ user, logout, router }: ProfileDropdownProps) => {
   const [showFundModal, setShowFundModal] = useState(false);
   const { wallets } = useWalletContext();
-  const solanaWallet = wallets.find(wallet => wallet.name === 'Default Agent Wallet');
-  const walletAddress = solanaWallet?.address || '';
+  const walletAddress = user?.walletAddress;
 
   const handleViewPublicProfile = () => {
     if (user?.username) {
@@ -177,7 +176,7 @@ const ProfileDropdown = ({ user, logout, router }: ProfileDropdownProps) => {
       <FundWalletModal
         isOpen={showFundModal}
         onClose={() => setShowFundModal(false)}
-        sonicAddress={walletAddress}
+        sonicAddress={walletAddress || ''}
       />
     </DropdownMenu>
   );

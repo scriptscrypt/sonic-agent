@@ -197,7 +197,7 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
       <div className="flex items-center justify-center h-screen">
         <div className="flex flex-col items-center space-y-4 max-w-md text-center p-6 bg-card rounded-2xl shadow-md border border-border/50">
           <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-            <AgentLogo />
+            <AgentLogo className="rounded-lg" />
           </div>
           <h2 className="text-xl font-semibold">Session Error</h2>
           <p className="text-muted-foreground">
@@ -232,7 +232,7 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
             <div className="flex justify-start mb-4 message-animation">
               <div className="flex relative items-start max-w-[85%]">
                 <div className="absolute -left-10 top-1 w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                  <AgentLogo />
+                  <AgentLogo className="rounded-lg"/>
                 </div>
                 <div className="px-4 py-3 text-[15px] tracking-[-0.01em] leading-[1.65] font-medium rounded-2xl bg-secondary text-secondary-foreground rounded-bl-none shadow-sm">
                   <div className="flex items-center space-x-2">
