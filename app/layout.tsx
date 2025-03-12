@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import SideNav from "@/components/layout/SideNav";
 import { ChatProvider } from "@/components/chat/SolanaAgentProvider";
 import { Providers } from "./providers";
+import { ClientLayout } from "./components/ClientLayout";
 // import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
@@ -32,12 +32,9 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
           <ChatProvider>
-            <div className="fixed inset-0 bg-background flex">
-              <SideNav />
-              <main className="flex-1 relative overflow-y-auto scrollbar-none scroll-smooth">
-                <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8">{children}</div>
-              </main>
-            </div>
+            <ClientLayout>
+              {children}
+            </ClientLayout>
             {/* <Toaster /> */}
           </ChatProvider>
         </Providers>

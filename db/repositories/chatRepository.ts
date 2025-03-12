@@ -1,6 +1,7 @@
 import { db } from '../index';
 import { chatSessions, chatMessages, NewChatSession, NewChatMessage, ChatSession, ChatMessage } from '../schema';
 import { eq, desc } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
 // Chat Sessions Repository
 export const chatSessionsRepository = {
@@ -31,7 +32,34 @@ export const chatSessionsRepository = {
 
   // Update a chat session
   async updateSession(id: number, session: Partial<NewChatSession>): Promise<ChatSession | undefined> {
-    const result = await db.update(chatSessions).set(session).where(eq(chatSessions.id, id)).returning();
+    // Handle the case where isShared might be passed but not in the schema yet
+    const updateData = { ...session };
+    
+    // If isShared is passed but not in the schema, try to add it
+    if ('isShared' in updateData && !('isShared' in chatSessions)) {
+      try {
+        // Try to add the column if it doesn't exist
+        await db.execute(sql`
+          DO $$ 
+          BEGIN
+              IF NOT EXISTS (
+                  SELECT 1 
+                  FROM information_schema.columns 
+                  WHERE table_name = 'chat_sessions' 
+                  AND column_name = 'is_shared'
+              ) THEN
+                  ALTER TABLE "chat_sessions" ADD COLUMN "is_shared" boolean DEFAULT false;
+              END IF;
+          END $$;
+        `);
+      } catch (error) {
+        console.error("Error adding isShared column:", error);
+        // Remove isShared from updateData if we couldn't add the column
+        delete (updateData as any).isShared;
+      }
+    }
+    
+    const result = await db.update(chatSessions).set(updateData).where(eq(chatSessions.id, id)).returning();
     return result[0];
   },
 

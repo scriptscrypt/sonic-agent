@@ -328,6 +328,8 @@ export function ChatInput({
                 </button>
               </div>
               <Image
+                width={100}
+                height={100}
                 src={imagePreview}
                 alt="Preview"
                 className="max-h-48 rounded-lg object-contain border border-border/50 bg-white"
@@ -359,6 +361,8 @@ export function ChatInput({
                     onClick={() => selectRecentImage(img.url)}
                   >
                     <Image
+                      width={100}
+                      height={100}
                       src={img.url}
                       alt={`Recent ${index + 1}`}
                       className="w-full h-full object-cover"

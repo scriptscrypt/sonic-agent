@@ -50,6 +50,8 @@ function UserMessage({ content }: UserMessageProps) {
                 Attached Image
               </div>
               <Image
+                width={100}
+                height={100}
                 src={imageUrl} 
                 alt="Attached image" 
                 className="max-h-48 w-full rounded-sm object-contain bg-white dark:bg-black/5"

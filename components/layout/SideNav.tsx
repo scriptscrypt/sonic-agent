@@ -8,6 +8,9 @@ import {
 	Keyboard,
 	Trash,
 	Broadcast,
+	DotsThreeVertical,
+	Share,
+	PencilSimple,
 } from "@phosphor-icons/react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -17,7 +20,13 @@ import { ThemeSwitcher } from "./ThemeSwitcher";
 import { MobileNav } from "./MobileNav";
 import { useRouter } from "next/navigation";
 import { MOCK_MODELS } from "../chat/ChatInput";
-import { useChatSessions, useDeleteChatSession } from "@/lib/hooks/useChatSessions";
+import { useChatSessions, useDeleteChatSession, useUpdateChatSession } from "@/lib/hooks/useChatSessions";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function SideNav() {
 	const [selectedConversation, setSelectedConversation] = useState<
@@ -27,10 +36,13 @@ export default function SideNav() {
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(true);
 	const [isMobile, setIsMobile] = useState(false);
+	const [renameSessionId, setRenameSessionId] = useState<number | null>(null);
+	const [newTitle, setNewTitle] = useState("");
 
 	// Use React Query hooks for sessions
 	const { data: sessions = [], isLoading: isSessionsLoading } = useChatSessions();
 	const deleteSessionMutation = useDeleteChatSession();
+	const updateSessionMutation = useUpdateChatSession();
 
 	useEffect(() => {
 		const checkMobile = () => {
@@ -62,6 +74,50 @@ export default function SideNav() {
 			}
 		} catch (error) {
 			console.error("Error deleting session:", error);
+		}
+	};
+
+	const handleShareSession = async (sessionId: number, e: React.MouseEvent) => {
+		e.stopPropagation();
+		try {
+			// Update the session to mark it as shared
+			await updateSessionMutation.mutateAsync({
+				id: sessionId,
+				// Use a string key to avoid TypeScript errors
+				"isShared": true,
+			} as any);
+			
+			// Generate a shareable URL
+			const shareableUrl = `${window.location.origin}/shared/${sessionId}`;
+			
+			// Copy to clipboard
+			await navigator.clipboard.writeText(shareableUrl);
+			
+			// You could add a toast notification here
+			alert("Shareable link copied to clipboard!");
+		} catch (error) {
+			console.error("Error sharing session:", error);
+		}
+	};
+
+	const handleRenameClick = (sessionId: number, currentTitle: string, e: React.MouseEvent) => {
+		e.stopPropagation();
+		setRenameSessionId(sessionId);
+		setNewTitle(currentTitle);
+	};
+
+	const handleRenameSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (renameSessionId && newTitle.trim()) {
+			try {
+				await updateSessionMutation.mutateAsync({
+					id: renameSessionId,
+					title: newTitle.trim(),
+				});
+				setRenameSessionId(null);
+			} catch (error) {
+				console.error("Error renaming session:", error);
+			}
 		}
 	};
 
@@ -211,44 +267,87 @@ export default function SideNav() {
 										</div>
 									) : (
 										sessions.map((item) => (
-											<Button
-												key={item.id}
-												variant="ghost"
-												className={cn(
-													"group flex flex-col items-start w-full px-2 sm:px-3 py-2 sm:py-2.5 h-auto",
-													"overflow-hidden relative",
-													selectedConversation === item.id
-														? "bg-muted"
-														: "hover:bg-muted/50",
-												)}
-												onClick={() => handleSessionClick(item.id)}
-											>
-												<div className="w-full">
-													<div
+											<div key={item.id} className="relative">
+												{renameSessionId === item.id ? (
+													<form onSubmit={handleRenameSubmit} onClick={(e) => e.stopPropagation()} className="px-2 py-2">
+														<input
+															type="text"
+															value={newTitle}
+															onChange={(e) => setNewTitle(e.target.value)}
+															className="w-full px-2 py-1 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-accent"
+															autoFocus
+															onBlur={handleRenameSubmit}
+														/>
+													</form>
+												) : (
+													<Button
+														variant="ghost"
 														className={cn(
-															"text-[13px] sm:text-[14px] text-left truncate",
+															"group flex flex-col items-start w-full px-2 sm:px-3 py-2 sm:py-2.5 h-auto",
+															"overflow-hidden relative",
 															selectedConversation === item.id
-																? "text-foreground"
-																: "text-muted-foreground",
+																? "bg-muted"
+																: "hover:bg-muted/50",
 														)}
+														onClick={() => handleSessionClick(item.id)}
 													>
-														{item.title}
-													</div>
-													<div className="text-[11px] sm:text-[12px] text-muted-foreground mt-1 text-left truncate">
-														{new Date(item.timestamp).toLocaleString()}
-													</div>
-												</div>
+														<div className="w-full">
+															<div
+																className={cn(
+																	"text-[13px] sm:text-[14px] text-left truncate",
+																	selectedConversation === item.id
+																		? "text-foreground"
+																		: "text-muted-foreground",
+																)}
+															>
+																{item.title}
+															</div>
+															<div className="text-[11px] sm:text-[12px] text-muted-foreground mt-1 text-left truncate">
+																{new Date(item.timestamp).toLocaleString()}
+																{item.isShared && (
+																	<span className="ml-2 text-accent">• Shared</span>
+																)}
+															</div>
+														</div>
 
-												{/* Delete button */}
-												<Button
-													variant="ghost"
-													size="icon"
-													className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
-													onClick={(e) => handleDeleteSession(item.id, e)}
-												>
-													<Trash size={14} weight="bold" />
-												</Button>
-											</Button>
+														{/* More options dropdown */}
+														<DropdownMenu>
+															<DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+																<Button
+																	variant="ghost"
+																	size="icon"
+																	className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-muted transition-opacity"
+																>
+																	<DotsThreeVertical size={16} weight="bold" />
+																</Button>
+															</DropdownMenuTrigger>
+															<DropdownMenuContent align="end" className="w-48 p-1">
+																<DropdownMenuItem 
+																	className="flex items-center gap-2 cursor-pointer"
+																	onClick={(e) => handleShareSession(item.id, e)}
+																>
+																	<Share size={14} weight="bold" />
+																	<span>Share</span>
+																</DropdownMenuItem>
+																<DropdownMenuItem 
+																	className="flex items-center gap-2 cursor-pointer"
+																	onClick={(e) => handleRenameClick(item.id, item.title, e)}
+																>
+																	<PencilSimple size={14} weight="bold" />
+																	<span>Rename</span>
+																</DropdownMenuItem>
+																<DropdownMenuItem 
+																	className="flex items-center gap-2 cursor-pointer text-destructive hover:text-destructive focus:text-destructive"
+																	onClick={(e) => handleDeleteSession(item.id, e)}
+																>
+																	<Trash size={14} weight="bold" />
+																	<span>Delete</span>
+																</DropdownMenuItem>
+															</DropdownMenuContent>
+														</DropdownMenu>
+													</Button>
+												)}
+											</div>
 										))
 									)}
 								</div>

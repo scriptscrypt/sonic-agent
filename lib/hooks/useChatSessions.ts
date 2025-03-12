@@ -9,6 +9,7 @@ export interface ChatSession {
   timestamp: string;
   modelName: string;
   modelSubText?: string;
+  isShared?: boolean;
 }
 
 export interface CreateSessionInput {

@@ -4,7 +4,7 @@ import { chatSessionsRepository } from "@/db/repositories/chatRepository";
 // GET a specific chat session
 export async function GET(
   req: NextRequest,
-  { params }: any
+  { params }: { params: { id: string } }
 ) {
   try {
     if (!params || !params.id) {
@@ -33,7 +33,7 @@ export async function GET(
 // PUT update a chat session
 export async function PUT(
   req: NextRequest,
-  { params }: any
+  { params }: { params: { id: string } }
 ) {
   try {
     if (!params || !params.id) {
@@ -46,12 +46,14 @@ export async function PUT(
       return NextResponse.json({ error: "Invalid session ID" }, { status: 400 });
     }
     
-    const { title, modelName, modelSubText } = await req.json();
+    const requestData = await req.json();
+    const { title, modelName, modelSubText, isShared } = requestData;
     
     const updatedSession = await chatSessionsRepository.updateSession(sessionId, {
       title,
       modelName,
       modelSubText,
+      isShared,
     });
     
     if (!updatedSession) {
@@ -68,7 +70,7 @@ export async function PUT(
 // DELETE a chat session
 export async function DELETE(
   req: NextRequest,
-  { params }: any
+  { params }: { params: { id: string } }
 ) {
   try {
     if (!params || !params.id) {

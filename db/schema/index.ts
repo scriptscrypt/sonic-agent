@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, varchar, integer, jsonb, decimal } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, varchar, integer, jsonb, decimal, boolean } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Users table
@@ -20,12 +20,13 @@ export const chatSessions = pgTable('chat_sessions', {
   timestamp: timestamp('timestamp').defaultNow().notNull(),
   modelName: varchar('model_name', { length: 100 }).notNull(),
   modelSubText: varchar('model_sub_text', { length: 100 }),
+  isShared: boolean('is_shared').default(false),
 });
 
 // Chat messages table
 export const chatMessages = pgTable('chat_messages', {
   id: serial('id').primaryKey(),
-  sessionId: serial('session_id').references(() => chatSessions.id, { onDelete: 'cascade' }).notNull(),
+  sessionId: integer('session_id').references(() => chatSessions.id, { onDelete: 'cascade' }).notNull(),
   content: text('content').notNull(),
   role: varchar('role', { length: 20 }).notNull(), // 'user' or 'assistant'
   timestamp: timestamp('timestamp').defaultNow().notNull(),
