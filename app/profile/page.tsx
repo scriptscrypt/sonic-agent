@@ -263,9 +263,17 @@ export default function SettingsPage() {
               
               <div className="space-y-2">
                 <Label>Wallet Address</Label>
-                <p className="text-sm font-mono bg-muted p-2 rounded">
-                  {user?.walletAddress || 'No wallet connected'}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm truncatemd:truncate-none font-mono bg-muted p-2 rounded">
+                    {user?.walletAddress || 'No wallet connected'}
+                  </p>
+                <Button variant="outline" onClick={() => {
+                  navigator.clipboard.writeText(user?.walletAddress || '');
+                  toast.success('Wallet address copied to clipboard');
+                }}>
+                    Copy
+                  </Button>
+                </div>
               </div>
               
               <div className="space-y-2">

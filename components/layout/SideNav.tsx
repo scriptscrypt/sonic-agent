@@ -248,7 +248,8 @@ export default function SideNav() {
                 variant="newThread"
                 className={cn(
                   "h-11 bg-accent/10 text-accent hover:bg-accent/20",
-                  !isExpanded && !isMobile && "justify-center p-2"
+                  !isExpanded && !isMobile && "justify-center p-2",
+                  isMobile && "mt-16"
                 )}
                 onClick={() => {
                   router.push(`/chat/new`);
