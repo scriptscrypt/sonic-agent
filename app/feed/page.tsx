@@ -2,6 +2,7 @@
 
 import { useNFTs } from '@/lib/hooks/useNFTs';
 import { useTokens } from '@/lib/hooks/useTokens';
+import { useBirdeyeMarkets, BirdeyeMarket } from '@/lib/hooks/useBirdeyeTokens';
 import { NFTGrid } from '@/components/ui/NFTGrid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,13 +13,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Token } from '@/db/schema';
 import { TokenDetailSheet } from '@/components/TokenDetailSheet';
+import { BirdeyeTokenCard } from '@/app/components/BirdeyeTokenCard';
 
 export default function FeedPage() {
   const { data: nfts, isLoading: nftsLoading, error: nftsError } = useNFTs();
   const { data: tokens, isLoading: tokensLoading, error: tokensError } = useTokens();
+  const { data: birdeyeData, isLoading: birdeyeLoading, error: birdeyeError } = useBirdeyeMarkets();
   const [isCopied, setIsCopied] = useState(false);
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
+  const [selectedBirdeyeMarket, setSelectedBirdeyeMarket] = useState<BirdeyeMarket | null>(null);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -36,6 +40,16 @@ export default function FeedPage() {
     setIsDetailSheetOpen(true);
   };
 
+  const handleBirdeyeMarketClick = (market: BirdeyeMarket) => {
+    // Open in a new tab to Birdeye explorer for the base token
+    if (market.base && market.base.address) {
+      window.open(`https://birdeye.so/token/${market.base.address}?chain=solana`, '_blank');
+    } else {
+      // Fallback to the market address if base address is not available
+      window.open(`https://birdeye.so/market/${market.address}?chain=solana`, '_blank');
+    }
+  };
+
   return (
     <div className="container py-8 mt-4">
       <div className="flex flex-col gap-6">
@@ -50,6 +64,7 @@ export default function FeedPage() {
           <TabsList className="mb-6">
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="tokens">Tokens</TabsTrigger>
+            <TabsTrigger value="birdeye">Birdeye</TabsTrigger>
             <TabsTrigger value="nfts">NFTs</TabsTrigger>
           </TabsList>
           
@@ -83,6 +98,36 @@ export default function FeedPage() {
               ) : (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">No tokens found</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Birdeye Tokens Section */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Trending on Birdeye</h2>
+              {birdeyeLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                  ))}
+                </div>
+              ) : birdeyeError ? (
+                <div className="text-center py-12">
+                  <p className="text-destructive">Error loading Birdeye markets</p>
+                </div>
+              ) : birdeyeData && birdeyeData.data && birdeyeData.data.items && birdeyeData.data.items.length > 0 ? (
+                <div className="grid grid-cols-1 gap-4">
+                  {birdeyeData.data.items.slice(0, 3).map(market => (
+                    <BirdeyeTokenCard 
+                      key={market.address} 
+                      market={market} 
+                      onClick={() => handleBirdeyeMarketClick(market)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No Birdeye markets found</p>
                 </div>
               )}
             </div>
@@ -143,6 +188,38 @@ export default function FeedPage() {
             ) : (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">No tokens found</p>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="birdeye" className="mt-0">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Trending Markets on Birdeye</h2>
+              <p className="text-sm text-muted-foreground">Sorted by liquidity</p>
+            </div>
+            {birdeyeLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                ))}
+              </div>
+            ) : birdeyeError ? (
+              <div className="text-center py-12">
+                <p className="text-destructive">Error loading Birdeye markets</p>
+              </div>
+            ) : birdeyeData && birdeyeData.data && birdeyeData.data.items && birdeyeData.data.items.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4">
+                {birdeyeData.data.items.map(market => (
+                  <BirdeyeTokenCard 
+                    key={market.address} 
+                    market={market} 
+                    onClick={() => handleBirdeyeMarketClick(market)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No Birdeye markets found</p>
               </div>
             )}
           </TabsContent>
