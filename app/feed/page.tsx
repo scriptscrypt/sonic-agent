@@ -180,6 +180,8 @@ export default function FeedPage() {
         token={selectedToken} 
         isOpen={isDetailSheetOpen} 
         onOpenChange={setIsDetailSheetOpen} 
+        tokens={tokens || []}
+        onNavigate={(token) => setSelectedToken(token)}
       />
     </div>
   );

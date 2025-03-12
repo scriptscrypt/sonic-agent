@@ -269,7 +269,7 @@ export function TokenPriceChart({ tokenSymbol, currentPrice, priceChange, timeRa
           <div 
             className="absolute top-2 bottom-6 w-px bg-foreground/20 pointer-events-none"
             style={{ 
-              left: `${16 + (chartData.findIndex(p => p.timestamp === hoverPoint.timestamp) / (chartData.length - 1)) * (chartRef.current?.getBoundingClientRect().width - 20 || 0)}px` 
+              left: `${16 + (chartData.findIndex(p => p.timestamp === hoverPoint.timestamp) / (chartData.length - 1)) * ((chartRef.current?.getBoundingClientRect().width ?? 0) - 20)}px` 
             }}
           />
         )}

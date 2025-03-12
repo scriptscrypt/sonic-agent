@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef, memo } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 
 interface TradingViewWidgetProps {
   symbol: string;
   theme?: 'light' | 'dark';
   timeframe?: string;
+  height?: string | number;
 }
 
 // Export the memo'd component
@@ -14,113 +15,73 @@ export const TradingViewWidget = memo(TradingViewWidgetComponent);
 function TradingViewWidgetComponent({ 
   symbol = 'SOL', 
   theme = 'light',
-  timeframe = '1D'
+  timeframe = '1D',
+  height = '100%'
 }: TradingViewWidgetProps) {
   const container = useRef<HTMLDivElement>(null);
-  const scriptRef = useRef<HTMLScriptElement | null>(null);
-  const widgetRef = useRef<any>(null);
-
+  
   // Use SOL as fallback if symbol is empty
   const tokenSymbol = symbol || 'SOL';
 
+  // Map timeframe to interval
+  const intervalMap: Record<string, string> = {
+    '1D': '60',
+    '1W': 'D',
+    '1M': 'W',
+    '3M': 'M',
+    '1Y': '3M'
+  };
+  
+  const interval = intervalMap[timeframe] || '60';
+  
+  // Format symbol for TradingView
+  const formattedSymbol = tokenSymbol.includes(':') ? tokenSymbol : `BINANCE:${tokenSymbol}USDT`;
+
+  // Use direct iframe approach instead of the TradingView widget library
   useEffect(() => {
-    // Generate a unique container ID
-    const containerId = `tradingview_${tokenSymbol.replace(/[^a-zA-Z0-9]/g, '_')}_${Math.floor(Math.random() * 1000000)}`;
+    if (!container.current) return;
     
-    if (container.current) {
-      container.current.id = containerId;
+    // Clear the container first
+    while (container.current.firstChild) {
+      container.current.removeChild(container.current.firstChild);
     }
-
-    // Map timeframe to interval
-    const intervalMap: Record<string, string> = {
-      '1D': '60',
-      '1W': 'D',
-      '1M': 'W',
-      '3M': 'M',
-      '1Y': '3M'
-    };
     
-    const interval = intervalMap[timeframe] || '60';
+    // Create iframe
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('frameBorder', '0');
+    iframe.setAttribute('allowTransparency', 'true');
+    iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('src', `https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=${formattedSymbol}&interval=${interval}&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=${theme === 'dark' ? '2B2B43' : 'f1f3f6'}&studies=%5B%5D&theme=${theme}&style=1&timezone=Etc%2FUTC&withdateranges=1&studies_overrides=%7B%7D&overrides=%7B%22mainSeriesProperties.candleStyle.upColor%22%3A%22%2322c55e%22%2C%22mainSeriesProperties.candleStyle.downColor%22%3A%22%23ef4444%22%2C%22mainSeriesProperties.candleStyle.wickUpColor%22%3A%22%2322c55e%22%2C%22mainSeriesProperties.candleStyle.wickDownColor%22%3A%22%23ef4444%22%7D&enabled_features=%5B%22move_logo_to_main_pane%22%5D&disabled_features=%5B%22use_localstorage_for_settings%22%2C%22header_symbol_search%22%2C%22header_screenshot%22%2C%22header_compare%22%5D&locale=en&utm_source=&utm_medium=widget&utm_campaign=chart`);
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.display = 'block';
     
-    // Format symbol for TradingView
-    const formattedSymbol = tokenSymbol.includes(':') ? tokenSymbol : `BINANCE:${tokenSymbol}USDT`;
-
-    // Load TradingView script if not already loaded
-    if (!window.TradingView) {
-      scriptRef.current = document.createElement('script');
-      scriptRef.current.src = 'https://s3.tradingview.com/tv.js';
-      scriptRef.current.async = true;
-      scriptRef.current.onload = () => createWidget(containerId, formattedSymbol, interval);
-      document.head.appendChild(scriptRef.current);
-    } else {
-      createWidget(containerId, formattedSymbol, interval);
-    }
-
-    function createWidget(containerId: string, symbol: string, interval: string) {
-      if (!window.TradingView || !container.current) return;
-      
-      // Clean up previous widget if it exists
-      if (widgetRef.current) {
-        try {
-          widgetRef.current = null;
-        } catch (e) {
-          console.error('Error cleaning up widget:', e);
-        }
-      }
-
-      // Create new widget
-      widgetRef.current = new window.TradingView.widget({
-        autosize: true,
-        symbol: symbol,
-        interval: interval,
-        timezone: 'Etc/UTC',
-        theme: theme,
-        style: '1',
-        locale: 'en',
-        toolbar_bg: theme === 'dark' ? '#2B2B43' : '#f1f3f6',
-        enable_publishing: false,
-        hide_side_toolbar: false,
-        allow_symbol_change: true,
-        container_id: containerId,
-        hide_top_toolbar: false,
-        hide_legend: false,
-        save_image: false,
-        studies: ['RSI@tv-basicstudies'],
-        show_popup_button: false,
-        width: '100%',
-        height: '100%',
-        disabled_features: [
-          "use_localstorage_for_settings",
-          "header_symbol_search",
-          "header_screenshot",
-          "header_compare",
-          "header_undo_redo",
-          "header_saveload"
-        ],
-        enabled_features: [
-          "move_logo_to_main_pane",
-          "same_data_requery",
-          "side_toolbar_in_fullscreen_mode"
-        ],
-        loading_screen: { backgroundColor: theme === 'dark' ? '#131722' : '#ffffff' },
-        overrides: {
-          "mainSeriesProperties.candleStyle.upColor": "#22c55e",
-          "mainSeriesProperties.candleStyle.downColor": "#ef4444",
-          "mainSeriesProperties.candleStyle.wickUpColor": "#22c55e",
-          "mainSeriesProperties.candleStyle.wickDownColor": "#ef4444"
-        }
-      });
-    }
-
-    // Cleanup function
+    container.current.appendChild(iframe);
+    
     return () => {
-      if (widgetRef.current) {
-        widgetRef.current = null;
+      if (container.current) {
+        while (container.current.firstChild) {
+          container.current.removeChild(container.current.firstChild);
+        }
       }
     };
-  }, [tokenSymbol, theme, timeframe]);
+  }, [formattedSymbol, interval, theme]);
 
-  return <div ref={container} className="w-full h-full min-h-[400px]" />;
+  // Calculate the height style
+  const heightStyle = typeof height === 'number' ? `${height}px` : height;
+
+  return (
+    <div 
+      ref={container} 
+      style={{ 
+        width: '100%',
+        height: heightStyle,
+        minHeight: '500px',
+        position: 'relative',
+        display: 'block'
+      }} 
+    />
+  );
 }
 
 // Add TypeScript interface for TradingView global
