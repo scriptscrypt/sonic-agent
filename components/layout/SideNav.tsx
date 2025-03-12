@@ -190,7 +190,7 @@ export default function SideNav() {
 
 					{/* Recent Items - Only show when expanded on desktop */}
 					{(isExpanded || (!isExpanded && isMobile)) && (
-						<div className="flex-1 min-h-0">
+						<div className="flex flex-col flex-1 min-h-0 overflow-hidden">
 							<div className="flex items-center justify-between px-6 py-2 shrink-0">
 								<div className="text-sm font-medium text-muted-foreground">
 									Recent
@@ -199,57 +199,59 @@ export default function SideNav() {
 									{sessions.length} chats
 								</div>
 							</div>
-							<div className="px-3 space-y-1 overflow-y-auto max-h-[calc(100vh-280px)]">
-								{isSessionsLoading ? (
-									<div className="text-center py-4 text-sm text-muted-foreground">
-										Loading sessions...
-									</div>
-								) : sessions.length === 0 ? (
-									<div className="text-center py-4 text-sm text-muted-foreground">
-										No sessions yet
-									</div>
-								) : (
-									sessions.map((item) => (
-										<Button
-											key={item.id}
-											variant="ghost"
-											className={cn(
-												"group flex flex-col items-start w-full px-2 sm:px-3 py-2 sm:py-2.5 h-auto",
-												"overflow-hidden relative",
-												selectedConversation === item.id
-													? "bg-muted"
-													: "hover:bg-muted/50",
-											)}
-											onClick={() => handleSessionClick(item.id)}
-										>
-											<div className="w-full">
-												<div
-													className={cn(
-														"text-[13px] sm:text-[14px] text-left truncate",
-														selectedConversation === item.id
-															? "text-foreground"
-															: "text-muted-foreground",
-													)}
-												>
-													{item.title}
-												</div>
-												<div className="text-[11px] sm:text-[12px] text-muted-foreground mt-1 text-left truncate">
-													{new Date(item.timestamp).toLocaleString()}
-												</div>
-											</div>
-
-											{/* Delete button */}
+							<div className="px-3 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40">
+								<div className="space-y-1 py-1">
+									{isSessionsLoading ? (
+										<div className="text-center py-4 text-sm text-muted-foreground">
+											Loading sessions...
+										</div>
+									) : sessions.length === 0 ? (
+										<div className="text-center py-4 text-sm text-muted-foreground">
+											No sessions yet
+										</div>
+									) : (
+										sessions.map((item) => (
 											<Button
+												key={item.id}
 												variant="ghost"
-												size="icon"
-												className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
-												onClick={(e) => handleDeleteSession(item.id, e)}
+												className={cn(
+													"group flex flex-col items-start w-full px-2 sm:px-3 py-2 sm:py-2.5 h-auto",
+													"overflow-hidden relative",
+													selectedConversation === item.id
+														? "bg-muted"
+														: "hover:bg-muted/50",
+												)}
+												onClick={() => handleSessionClick(item.id)}
 											>
-												<Trash size={14} weight="bold" />
+												<div className="w-full">
+													<div
+														className={cn(
+															"text-[13px] sm:text-[14px] text-left truncate",
+															selectedConversation === item.id
+																? "text-foreground"
+																: "text-muted-foreground",
+														)}
+													>
+														{item.title}
+													</div>
+													<div className="text-[11px] sm:text-[12px] text-muted-foreground mt-1 text-left truncate">
+														{new Date(item.timestamp).toLocaleString()}
+													</div>
+												</div>
+
+												{/* Delete button */}
+												<Button
+													variant="ghost"
+													size="icon"
+													className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-opacity"
+													onClick={(e) => handleDeleteSession(item.id, e)}
+												>
+													<Trash size={14} weight="bold" />
+												</Button>
 											</Button>
-										</Button>
-									))
-								)}
+										))
+									)}
+								</div>
 							</div>
 						</div>
 					)}
