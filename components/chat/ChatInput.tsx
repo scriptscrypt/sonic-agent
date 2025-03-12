@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import {
   ArrowRight,
-  Image,
+  Image as ImageIcon,
   X,
   Spinner,
   Clock,
@@ -15,6 +15,7 @@ import { DropdownComp } from "./WalletSelector";
 import { useEffect, useState, useRef } from "react";
 import { WalletSelector } from "@/components/wallet/WalletSelector";
 import { WalletInfo } from "@/lib/hooks/useWallet";
+import Image from "next/image";
 
 export const MOCK_MODELS = [
   {
@@ -280,7 +281,7 @@ export function ChatInput({
             <div className="relative p-4 border-b border-border/50 bg-muted/30">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center text-sm font-medium text-muted-foreground">
-                  <Image size={16} className="mr-1" />
+                  <ImageIcon size={16} className="mr-1" />
                   Selected Image
                 </div>
                 <button
@@ -326,7 +327,7 @@ export function ChatInput({
                   )}
                 </button>
               </div>
-              <img
+              <Image
                 src={imagePreview}
                 alt="Preview"
                 className="max-h-48 rounded-lg object-contain border border-border/50 bg-white"
@@ -357,7 +358,7 @@ export function ChatInput({
                     className="relative aspect-square cursor-pointer rounded-md overflow-hidden border border-border/50 hover:border-accent/50 transition-colors group"
                     onClick={() => selectRecentImage(img.url)}
                   >
-                    <img
+                    <Image
                       src={img.url}
                       alt={`Recent ${index + 1}`}
                       className="w-full h-full object-cover"
@@ -439,7 +440,7 @@ export function ChatInput({
                       disabled={isUploading}
                       title="Upload new image"
                     >
-                      <Image size={20} />
+                      <ImageIcon size={20} />
                     </button>
                   </>
                 )}

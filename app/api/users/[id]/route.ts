@@ -3,7 +3,7 @@ import { userRepository } from '@/db/repositories/userRepository';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: any
 ) {
   try {
     const id = parseInt(params.id);

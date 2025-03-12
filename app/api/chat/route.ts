@@ -24,10 +24,10 @@ function extractTokenInfo(response: string) {
       mintAddress: mintAddressMatch[1].trim(),
       description: `A token created via the Sonic chat interface.`,
       logoUrl: `https://cryptologos.cc/logos/${tokenNameMatch[1].toLowerCase().replace(/\s+/g, '-')}-logo.png`,
-      price: Math.random() * 10, // Random price between 0 and 10
-      marketCap: Math.floor(Math.random() * 1000000000), // Random market cap
-      volume24h: Math.floor(Math.random() * 100000000), // Random 24h volume
-      change24h: (Math.random() * 20) - 10, // Random change between -10% and +10%
+      price: (Math.random() * 10).toString(), // Convert to string
+      marketCap: Math.floor(Math.random() * 1000000000).toString(), // Convert to string
+      volume24h: Math.floor(Math.random() * 100000000).toString(), // Convert to string
+      change24h: ((Math.random() * 20) - 10).toString(), // Convert to string
       metadata: JSON.stringify({ createdViaSonic: true })
     };
   }

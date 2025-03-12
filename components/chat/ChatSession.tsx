@@ -14,6 +14,7 @@ import {
 import { useWalletContext } from "@/app/providers/WalletProvider";
 import { WalletInfo } from "@/lib/hooks/useWallet";
 import Link from "next/link";
+import Image from "next/image";
 
 interface UserMessageProps {
   content: string;
@@ -48,7 +49,7 @@ function UserMessage({ content }: UserMessageProps) {
                 </svg>
                 Attached Image
               </div>
-              <img 
+              <Image
                 src={imageUrl} 
                 alt="Attached image" 
                 className="max-h-48 w-full rounded-sm object-contain bg-white dark:bg-black/5"

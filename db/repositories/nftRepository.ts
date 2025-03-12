@@ -152,6 +152,9 @@ export const nftRepository = {
       const newNft: NFT = {
         id: mockNFTs.length + 1,
         ...nft,
+        description: nft.description || null,
+        metadata: nft.metadata || {},
+        mintAddress: nft.mintAddress || null,
         createdAt: new Date(),
         updatedAt: new Date()
       };
