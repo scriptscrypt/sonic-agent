@@ -19,8 +19,8 @@ export function PrivyProvider({ children }: PrivyProviderProps) {
         loginMethods: ["wallet", "email"],
         appearance: {
           theme: "dark",
-          accentColor: "#3ABAB4",
-          logo: "https://your-logo-url.com/logo.png",
+          accentColor: "#4C6EF5",
+          logo: "https://espio.fun/logo.png",
           showWalletLoginFirst: true,
           walletChainType: "ethereum-and-solana",
           walletList: ["detected_solana_wallets"],

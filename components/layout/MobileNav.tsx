@@ -12,6 +12,8 @@ import { User, SignOut, GearSix, Globe, Book } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useWalletContext } from "@/app/providers/WalletProvider";
+import { FundWalletModal } from "@/components/modals/FundWalletModal";
 
 interface MobileNavProps {
   isMobileMenuOpen: boolean;
@@ -106,28 +108,14 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
 
 // Extracted ProfileDropdown component to avoid duplication
 const ProfileDropdown = ({ user, logout, router }: ProfileDropdownProps) => {
-  // State to track if there's an error navigating to the public profile
-  const [hasProfileError, setHasProfileError] = useState(false);
+  const [showFundModal, setShowFundModal] = useState(false);
+  const { wallets } = useWalletContext();
+  const solanaWallet = wallets.find(wallet => wallet.name === 'Default Agent Wallet');
+  const walletAddress = solanaWallet?.address || '';
 
-  // Reset error state when user changes
-  useEffect(() => {
-    setHasProfileError(false);
-  }, [user]);
-
-  const handleViewPublicProfile = async () => {
-    try {
-      // If user has a username, navigate to their public profile
-      if (user?.username) {
-        router.push(`/${user.username}`);
-      } else {
-        // If no username, redirect to profile page to set one
-        router.push('/profile');
-        // You could also show a toast notification here
-        console.log('Please set a username to view your public profile');
-      }
-    } catch (error) {
-      console.error('Error navigating to public profile:', error);
-      setHasProfileError(true);
+  const handleViewPublicProfile = () => {
+    if (user?.username) {
+      router.push(`/${user.username}`);
     }
   };
 
@@ -167,9 +155,9 @@ const ProfileDropdown = ({ user, logout, router }: ProfileDropdownProps) => {
               <span>Bridge</span>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push("/guides")}>
+          <DropdownMenuItem onClick={() => setShowFundModal(true)}>
             <Book className="mr-2 h-4 w-4" />
-            <span>How to Guides</span>
+            <span>How to Bridge</span>
           </DropdownMenuItem>
         </div>
         
@@ -178,12 +166,19 @@ const ProfileDropdown = ({ user, logout, router }: ProfileDropdownProps) => {
         
         {/* Sign out option */}
         <div className="py-1">
-          <DropdownMenuItem onClick={() => logout && logout()}>
+          <DropdownMenuItem onClick={logout}>
             <SignOut className="mr-2 h-4 w-4" />
             <span>Sign out</span>
           </DropdownMenuItem>
         </div>
       </DropdownMenuContent>
+
+      {/* Fund Wallet Modal */}
+      <FundWalletModal
+        isOpen={showFundModal}
+        onClose={() => setShowFundModal(false)}
+        sonicAddress={walletAddress}
+      />
     </DropdownMenu>
   );
 };
