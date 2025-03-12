@@ -35,7 +35,7 @@ interface ProfileDropdownProps {
 }
 
 export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavProps) => {
-  const { user, logout } = useAuth();
+  const { user, logout, login, isAuthenticated } = useAuth();
   const router = useRouter();
 
   return (
@@ -78,8 +78,19 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
           </Button>
         </div>
         
-        {/* Right section: User profile dropdown */}
-        <ProfileDropdown user={user} logout={logout} router={router} />
+        {/* Right section: User profile dropdown or Login button */}
+        {isAuthenticated && user ? (
+          <ProfileDropdown user={user} logout={logout} router={router} />
+        ) : (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="font-medium"
+            onClick={() => login && login()}
+          >
+            Login
+          </Button>
+        )}
       </div>
 
       {/* Mobile Sidebar Overlay */}

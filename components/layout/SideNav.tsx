@@ -33,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 export default function SideNav() {
   const [selectedConversation, setSelectedConversation] = useState<
@@ -44,6 +45,7 @@ export default function SideNav() {
   const [isMobile, setIsMobile] = useState(false);
   const [renameSessionId, setRenameSessionId] = useState<number | null>(null);
   const [newTitle, setNewTitle] = useState("");
+  const { isAuthenticated, login } = useAuth();
 
   // Use React Query hooks for sessions
   const { data: sessions = [], isLoading: isSessionsLoading } =
@@ -226,31 +228,33 @@ export default function SideNav() {
               )}
             </div>
 
-            {/* New Thread Button */}
-            <Button
-              variant="newThread"
-              className={cn(
-                "h-11 bg-accent/10 text-accent hover:bg-accent/20",
-                !isExpanded && !isMobile && "justify-center p-2"
-              )}
-              onClick={() => {
-                router.push(`/chat/new`);
-              }}
-            >
-              <Plus size={17} weight="bold" />
-              {(isExpanded || (!isExpanded && isMobile)) && (
-                <>
-                  <span className="text-[15px]">New Chat</span>
-                </>
-              )}
-            </Button>
+            {/* New Thread Button - Only show when authenticated */}
+            {isAuthenticated && (
+              <Button
+                variant="newThread"
+                className={cn(
+                  "h-11 bg-accent/10 text-accent hover:bg-accent/20",
+                  !isExpanded && !isMobile && "justify-center p-2"
+                )}
+                onClick={() => {
+                  router.push(`/chat/new`);
+                }}
+              >
+                <Plus size={17} weight="bold" />
+                {(isExpanded || (!isExpanded && isMobile)) && (
+                  <>
+                    <span className="text-[15px]">New Chat</span>
+                  </>
+                )}
+              </Button>
+            )}
           </div>
 
           {/* Custom Divider */}
           <div className="h-[1px] w-full bg-border/50 shrink-0" />
 
-          {/* Mobile-only Feed Navigation */}
-          {isMobile && (
+          {/* Mobile-only Feed Navigation - Only show when authenticated */}
+          {isAuthenticated && isMobile && (
             <div className="px-3 py-2">
               <Button
                 variant="ghost"
@@ -266,14 +270,14 @@ export default function SideNav() {
             </div>
           )}
 
-          {/* Custom Divider for mobile Feed */}
-          {isMobile && <div className="h-[1px] w-full bg-border/50 shrink-0" />}
+          {/* Custom Divider for mobile Feed - Only show when authenticated */}
+          {isAuthenticated && isMobile && <div className="h-[1px] w-full bg-border/50 shrink-0" />}
           
           {/* Custom Divider before Recent section */}
-          <div className="h-[1px] w-full bg-border/50 shrink-0" />
+          {isAuthenticated && <div className="h-[1px] w-full bg-border/50 shrink-0" />}
 
-          {/* Recent Items - Only show when expanded on desktop */}
-          {(isExpanded || (!isExpanded && isMobile)) && (
+          {/* Recent Items - Only show when expanded on desktop and user is authenticated */}
+          {isAuthenticated && (isExpanded || (!isExpanded && isMobile)) && (
             <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
               <div className="flex items-center justify-between px-6 py-2 shrink-0">
                 <div className="text-sm font-medium text-muted-foreground">
@@ -409,6 +413,9 @@ export default function SideNav() {
               </div>
             </div>
           )}
+
+          {/* Spacer when not authenticated to push footer to bottom */}
+          {!isAuthenticated && <div className="flex-1" />}
 
           {/* Spacer when sidebar is collapsed on desktop */}
           {!isExpanded && !isMobile && <div className="flex-1" />}
