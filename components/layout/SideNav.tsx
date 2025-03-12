@@ -92,19 +92,19 @@ export default function SideNav() {
     try {
       // Generate a shareable URL
       const shareableUrl = `${window.location.origin}/shared/${sessionId}`;
-      
+
       // If not already shared, update the session to mark it as shared
-      if (!sessions.find(s => s.id === sessionId)?.isShared) {
+      if (!sessions.find((s) => s.id === sessionId)?.isShared) {
         await updateSessionMutation.mutateAsync({
           id: sessionId,
           // Use a string key to avoid TypeScript errors
-          "isShared": true,
+          isShared: true,
         } as any);
       }
-      
+
       // Copy to clipboard
       await navigator.clipboard.writeText(shareableUrl);
-      
+
       // Show toast notification
       toast.success("Shareable link copied to clipboard!");
     } catch (error) {
@@ -145,6 +145,14 @@ export default function SideNav() {
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-30"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <div
         className={cn(
@@ -180,28 +188,32 @@ export default function SideNav() {
                 isExpanded ? "justify-between px-1" : "md:justify-center"
               )}
             >
-              <div
-                className={cn(
-                  "flex items-center cursor-pointer",
-                  "gap-2 sm:gap-3 md:group py-1",
-                  !isExpanded && "md:justify-center"
-                )}
-                onClick={() => router.push("/")}
-              >
-                <AgentLogo />
-                {(isExpanded || (!isExpanded && isMobile)) && (
-                  <h1
-                    className={cn(
-                      "text-base sm:text-[18px] font-semibold",
-                      "text-foreground",
-                      "transition-all duration-300 ease-out",
-                      "group-hover:text-accent"
-                    )}
-                  >
-                    Espio
-                  </h1>
-                )}
-              </div>
+              {/* Desktop Logo - only show on desktop */}
+              {isExpanded && !isMobile && (
+                <div
+                  className={cn(
+                    "flex items-center cursor-pointer",
+                    "gap-2 sm:gap-3 md:group py-1",
+                    !isExpanded && "md:justify-center"
+                  )}
+                  onClick={() => router.push("/")}
+                >
+                  <>
+                    <AgentLogo />
+                    <h1
+                      className={cn(
+                        "text-base sm:text-[18px] font-semibold",
+                        "text-foreground",
+                        "transition-all duration-300 ease-out",
+                        "group-hover:text-accent"
+                      )}
+                    >
+                      Espio
+                    </h1>
+                  </>
+                </div>
+              )}
+              
               {isExpanded && !isMobile && (
                 <Button
                   variant="ghostNoBackground"
@@ -229,10 +241,6 @@ export default function SideNav() {
               {(isExpanded || (!isExpanded && isMobile)) && (
                 <>
                   <span className="text-[15px]">New Chat</span>
-                  {/* <div className="ml-auto flex items-center gap-1.5 text-[13px] opacity-60">
-										<Keyboard size={13} weight="bold" />
-										<span>K</span>
-									</div> */}
                 </>
               )}
             </Button>
@@ -241,9 +249,27 @@ export default function SideNav() {
           {/* Custom Divider */}
           <div className="h-[1px] w-full bg-border/50 shrink-0" />
 
-          {/* Navigation Links - Removed Feed link as it's now in the navbar */}
+          {/* Mobile-only Feed Navigation */}
+          {isMobile && (
+            <div className="px-3 py-2">
+              <Button
+                variant="ghost"
+                className="w-full flex items-center justify-start gap-2 h-10"
+                onClick={() => {
+                  router.push('/feed');
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                <Broadcast size={18} />
+                <span className="text-[15px]">Feed</span>
+              </Button>
+            </div>
+          )}
 
-          {/* Custom Divider */}
+          {/* Custom Divider for mobile Feed */}
+          {isMobile && <div className="h-[1px] w-full bg-border/50 shrink-0" />}
+          
+          {/* Custom Divider before Recent section */}
           <div className="h-[1px] w-full bg-border/50 shrink-0" />
 
           {/* Recent Items - Only show when expanded on desktop */}

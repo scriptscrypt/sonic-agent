@@ -42,16 +42,24 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
     <>
       {/* Unified Navbar for both mobile and desktop */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-background z-50 flex items-center justify-between px-4 border-b border-border">
-        {/* Left section: Hamburger menu (mobile only) and Logo */}
+        {/* Left section: Hamburger menu (mobile only) */}
         <div className="flex items-center">
           {/* Hamburger menu - only visible on mobile */}
-          <div className="md:hidden mr-4">
+          <div className="md:hidden">
             <Button variant="ghost" size="iconLg" active onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               <List size={26} weight="bold" />
             </Button>
           </div>
           
-          {/* Logo */}
+          {/* Desktop-only Logo - hidden on mobile */}
+          <div className="hidden md:flex items-center cursor-pointer" onClick={() => router.push("/")}>
+            <AgentLogo />
+            <h1 className="text-base font-semibold ml-2">Espio</h1>
+          </div>
+        </div>
+        
+        {/* Center section: Logo (mobile only) */}
+        <div className="md:hidden absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <div className="flex items-center cursor-pointer" onClick={() => router.push("/")}>
             <AgentLogo />
             <h1 className="text-base font-semibold ml-2">Espio</h1>
