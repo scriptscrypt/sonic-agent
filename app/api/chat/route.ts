@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { HumanMessage } from "@langchain/core/messages";
-import { getAgent } from "@/lib/solana-agent";
-import { Keypair } from "@solana/web3.js";
-import bs58 from "bs58";
-import { tokenRepository } from "@/db/repositories/tokenRepository";
 import { nftRepository } from "@/db/repositories/nftRepository";
+import { tokenRepository } from "@/db/repositories/tokenRepository";
+import { getAgent } from "@/lib/solana-agent";
+import { openai } from "@ai-sdk/openai";
+import { HumanMessage } from "@langchain/core/messages";
+import { streamText, ToolSet } from "ai";
+import { NextRequest, NextResponse } from "next/server";
 
 // Helper function to extract token information from response
 function extractTokenInfo(response: string) {
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Invalid request body");
     });
     
-    const { message, modelName, userId } = body;
+    const { message, modelName, userId, wallet } = body;
     
     if (!message) {
       console.error("Missing message in request");
@@ -84,8 +84,8 @@ export async function POST(req: NextRequest) {
     
     console.log("Chat API called with:", { message, modelName, userId });
     
-    // Get the agent
-    const { agent, config } = await getAgent(modelName || "default", "sonic");
+    // Get the agent with the wallet
+    const { tools } = await getAgent(modelName || "default", "sonic", wallet);
 
     const messages = [
       new HumanMessage({
@@ -94,21 +94,23 @@ export async function POST(req: NextRequest) {
     ];
 
     console.log("Streaming response from agent...");
-    const stream = await agent.stream({ messages }, config);
+    const stream = streamText({
+      model: openai("gpt-4"),
+      tools: tools as ToolSet,
+      system: `You are a helpful agent that can interact onchain using the Solana Agent Kit. You are
+          empowered to interact onchain using your tools. If you ever need funds, you can request them from the
+          faucet. If not, you can provide your wallet details and request funds from the user. If there is a 5XX
+          (internal) HTTP error code, ask the user to try again later. If someone asks you to do something you
+          can't do with your currently available tools, you must say so, and encourage them to implement it
+          themselves using the Solana Agent Kit, recommend they go to https://www.solanaagentkit.xyz for more information. Be
+          concise and helpful with your responses.`,
+      messages: messages as any,
+      maxSteps: 5,
+      temperature: 0.7,
+    });
 
-    let response = "";
+    const response = await stream.text;
 
-    for await (const chunk of stream) {
-      if ("agent" in chunk) {
-        console.log("Agent chunk received:", chunk.agent);
-        response += chunk.agent.messages[0].content + "\n";
-      } else if ("tools" in chunk) {
-        console.log("Tools chunk received:", chunk.tools.messages[0].content);
-      }
-    }
-
-    console.log("Final response:", response);
-    
     // Check if a token was created
     const tokenInfo = extractTokenInfo(response);
     if (tokenInfo && userId) {
@@ -139,27 +141,11 @@ export async function POST(req: NextRequest) {
       }
     }
     
-    return NextResponse.json({ response });
+    return stream.toTextStreamResponse();
   } catch (error) {
     console.error("Error in chat API:", error);
     return NextResponse.json({ 
       error: "Internal Server Error", 
-      details: error instanceof Error ? error.message : String(error) 
-    }, { status: 500 });
-  }
-}
-
-// get the wallet address from the user
-export async function GET(req: NextRequest) {
-  try {
-    const keypair = Keypair.fromSecretKey(
-      bs58.decode(process.env.SONIC_PRIVATE_KEY!)
-    );
-    return NextResponse.json({ walletAddress: keypair.publicKey.toBase58() });
-  } catch (error) {
-    console.error("Error getting wallet address:", error);
-    return NextResponse.json({ 
-      error: "Failed to get wallet address", 
       details: error instanceof Error ? error.message : String(error) 
     }, { status: 500 });
   }

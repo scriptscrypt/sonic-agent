@@ -5,6 +5,7 @@ import { useState, ReactNode } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { PrivyProvider } from './providers/PrivyProvider';
 import { WalletProvider } from './providers/WalletProvider';
+import { SolanaAgentProvider } from './providers/SolanaAgentProvider';
 
 interface ProvidersProps {
   children: ReactNode;
@@ -25,7 +26,9 @@ export function Providers({ children }: ProvidersProps) {
       <ThemeProvider attribute="class" defaultTheme="dark">
         <PrivyProvider>
           <WalletProvider>
-            {children}
+            <SolanaAgentProvider>
+              {children}
+            </SolanaAgentProvider>
           </WalletProvider>
         </PrivyProvider>
       </ThemeProvider>

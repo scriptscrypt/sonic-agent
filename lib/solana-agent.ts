@@ -17,9 +17,9 @@ import { initializeAgent } from "@/config/agent";
 let agentInstance: Awaited<ReturnType<typeof initializeAgent>> | null = null;
 let currentModel: string | null = null;
 
-export async function getAgent(modelName: string, chainType: "solana" | "sonic") {
+export async function getAgent(modelName: string, chainType: "solana" | "sonic", wallet?: any) {
   if (!agentInstance || currentModel !== modelName) {
-    agentInstance = await initializeAgent(modelName, chainType);
+    agentInstance = await initializeAgent(modelName, chainType, wallet);
     currentModel = modelName;
   }
   return agentInstance;
