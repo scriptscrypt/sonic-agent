@@ -10,13 +10,15 @@ import {
   createVercelAITools,
   SolanaAgentKit,
 } from "../agent-kit-v2/packages/core/src";
-import { usePrivy } from "@privy-io/react-auth";
 
 export async function initializeAgent(
   modelName: string,
-  chainType: "solana" | "sonic"
+  chainType: "solana" | "sonic", 
+  wallet: any
 ) {
-  const { user } = usePrivy();
+  // Remove the usePrivy hook as it can't be used in server components
+  // const { user } = usePrivy();
+  
   const llm = modelName?.includes("OpenAI")
     ? new ChatOpenAI({
         modelName: "gpt-4o-mini",
@@ -37,9 +39,9 @@ export async function initializeAgent(
 
   validateEnvironment();
 
-  const wallet = user?.wallet;
+  // Use the provided wallet or fallback to null if not provided
   const sonicAgent = new SolanaAgentKit(
-    wallet as unknown as BaseWallet,
+    wallet || null as unknown as BaseWallet,
     process.env.SOLANA_RPC_URL! as string,
     {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY! as string,

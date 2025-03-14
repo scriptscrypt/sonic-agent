@@ -60,7 +60,7 @@ export function useCreateChatMessage(sessionId: number) {
 }
 
 // Function to send a message to the AI and get a response
-export async function sendMessageToAI(message: string, modelName: string): Promise<string> {
+export async function sendMessageToAI(message: string, modelName: string, wallet: any): Promise<string> {
   console.log("Sending message to AI:", { message, modelName });
   
   try {
@@ -69,7 +69,7 @@ export async function sendMessageToAI(message: string, modelName: string): Promi
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ message, modelName }),
+      body: JSON.stringify({ message, modelName, wallet }),
     });
     
     if (!response.ok) {
@@ -88,7 +88,7 @@ export async function sendMessageToAI(message: string, modelName: string): Promi
 }
 
 // Hook for sending a message to the AI and storing both the user message and AI response
-export function useSendMessageToAI(sessionId: number) {
+export function useSendMessageToAI(sessionId: number, wallet: any) {
   const createMessage = useCreateChatMessage(sessionId);
   const queryClient = useQueryClient();
   
@@ -106,7 +106,7 @@ export function useSendMessageToAI(sessionId: number) {
         console.log("User message created:", userMessage);
         
         // Then, get the AI response
-        const aiResponse = await sendMessageToAI(message, modelName);
+        const aiResponse = await sendMessageToAI(message, modelName, wallet);
         
         console.log("AI response received:", aiResponse);
         

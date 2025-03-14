@@ -10,6 +10,11 @@ import { openai } from "@ai-sdk/openai";
 
 // Helper function to extract token information from response
 function extractTokenInfo(response: string) {
+  if (!response || typeof response !== 'string') {
+    console.warn('Invalid response format for token extraction:', response);
+    return null;
+  }
+
   // Look for token creation patterns in the response
   const tokenNameMatch = response.match(/created a new token[:\s]+["']?([^"'\n.]+)["']?/i) || 
                          response.match(/token called ["']?([^"'\n.]+)["']?/i) ||
@@ -39,6 +44,11 @@ function extractTokenInfo(response: string) {
 
 // Helper function to extract NFT information from response
 function extractNFTInfo(response: string) {
+  if (!response || typeof response !== 'string') {
+    console.warn('Invalid response format for NFT extraction:', response);
+    return null;
+  }
+
   // Look for NFT creation patterns in the response
   const nftNameMatch = response.match(/created a new NFT[:\s]+["']?([^"'\n.]+)["']?/i) || 
                        response.match(/NFT called ["']?([^"'\n.]+)["']?/i) ||
@@ -77,7 +87,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Invalid request body");
     });
     
-    const { message, modelName, userId } = body;
+    const { message, modelName, userId, wallet } = body;
     
     if (!message) {
       console.error("Missing message in request");
@@ -87,53 +97,77 @@ export async function POST(req: NextRequest) {
     console.log("Chat API called with:", { message, modelName, userId });
     
     // Get the agent
-    const { tools } = await getAgent(modelName || "default", "sonic");
+    const { tools } = await getAgent(modelName || "default", "sonic", wallet);
 
-    const messages = [
-      new HumanMessage({
+    // Format messages in the CoreMessage format expected by streamText
+    const formattedMessages: CoreMessage[] = [
+      {
+        role: "user",
         content: message
-      })
+      }
     ];
 
     console.log("Streaming response from agent...");
-    const stream = await streamText({
-      model: openai("gpt-4o"),
-      tools,
-      messages: messages as unknown as CoreMessage[],
-    });
+    try {
+      const stream = await streamText({
+        model: openai("gpt-4o"),
+        tools,
+        messages: formattedMessages,
+      });
 
-    let response = stream?.response as unknown as string;
-    // Check if a token was created
-    const tokenInfo = extractTokenInfo(response);
-    if (tokenInfo && userId) {
-      try {
-        console.log("Token detected, adding to database:", tokenInfo);
-        await tokenRepository.createToken({
-          ...tokenInfo,
-          userId: parseInt(userId)
-        });
-        console.log("Token added to database successfully");
-      } catch (error) {
-        console.error("Error adding token to database:", error);
+      // Ensure response is a string
+      let responseText: string;
+      if (stream && stream.response !== undefined) {
+        if (typeof stream.response === 'string') {
+          responseText = stream.response;
+        } else {
+          // If it's not a string, convert it to a string
+          responseText = JSON.stringify(stream.response);
+          console.log("Response was not a string, converted to:", responseText);
+        }
+      } else {
+        responseText = "No response received from AI";
+        console.warn("No response received from AI");
       }
-    }
-    
-    // Check if an NFT was created
-    const nftInfo = extractNFTInfo(response);
-    if (nftInfo && userId) {
-      try {
-        console.log("NFT detected, adding to database:", nftInfo);
-        await nftRepository.createNFT({
-          ...nftInfo,
-          userId: parseInt(userId)
-        });
-        console.log("NFT added to database successfully");
-      } catch (error) {
-        console.error("Error adding NFT to database:", error);
+
+      // Check if a token was created
+      const tokenInfo = extractTokenInfo(responseText);
+      if (tokenInfo && userId) {
+        try {
+          console.log("Token detected, adding to database:", tokenInfo);
+          await tokenRepository.createToken({
+            ...tokenInfo,
+            userId: parseInt(userId)
+          });
+          console.log("Token added to database successfully");
+        } catch (error) {
+          console.error("Error adding token to database:", error);
+        }
       }
+      
+      // Check if an NFT was created
+      const nftInfo = extractNFTInfo(responseText);
+      if (nftInfo && userId) {
+        try {
+          console.log("NFT detected, adding to database:", nftInfo);
+          await nftRepository.createNFT({
+            ...nftInfo,
+            userId: parseInt(userId)
+          });
+          console.log("NFT added to database successfully");
+        } catch (error) {
+          console.error("Error adding NFT to database:", error);
+        }
+      }
+      
+      return NextResponse.json({ response: responseText });
+    } catch (streamError) {
+      console.error("Error streaming response:", streamError);
+      return NextResponse.json({ 
+        error: "Stream Error", 
+        details: streamError instanceof Error ? streamError.message : String(streamError) 
+      }, { status: 500 });
     }
-    
-    return NextResponse.json({ response });
   } catch (error) {
     console.error("Error in chat API:", error);
     return NextResponse.json({ 

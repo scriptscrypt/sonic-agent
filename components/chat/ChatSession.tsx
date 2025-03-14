@@ -42,9 +42,9 @@ function UserMessage({ content }: UserMessageProps) {
           
           {/* Display image if URL is present */}
           {hasImageUrl && (
-            <div className="mt-2 border-t border-primary-foreground/20 pt-2">
-              <div className="text-xs text-primary-foreground/70 mb-1 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <div className="pt-2 mt-2 border-t border-primary-foreground/20">
+              <div className="flex items-center mb-1 text-xs text-primary-foreground/70">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                 </svg>
                 Attached Image
@@ -54,7 +54,7 @@ function UserMessage({ content }: UserMessageProps) {
                 height={100}
                 src={imageUrl} 
                 alt="Attached image" 
-                className="max-h-48 w-full rounded-sm object-contain bg-white dark:bg-black/5"
+                className="object-contain w-full bg-white rounded-sm max-h-48 dark:bg-black/5"
               />
             </div>
           )}
@@ -72,11 +72,11 @@ function AssistantMessage({ content }: AssistantMessageProps) {
   return (
     <div className="flex justify-start mb-4 message-animation">
       <div className="flex relative items-start max-w-[85%]">
-        <div className="absolute -left-10 top-1 w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+        <div className="absolute flex items-center justify-center w-8 h-8 rounded-full -left-10 top-1 bg-accent/10">
           <AgentLogo />
         </div>
         <div className="px-4 py-3 text-[15px] tracking-[-0.01em] leading-[1.65] font-medium rounded-2xl bg-secondary text-secondary-foreground rounded-bl-none shadow-sm">
-          <div className="prose prose-sm dark:prose-invert max-w-none">
+          <div className="prose-sm prose dark:prose-invert max-w-none">
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
         </div>
@@ -116,7 +116,7 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
     error: messagesError
   } = useChatMessages(sessionId);
   
-  const sendMessage = useSendMessageToAI(sessionId);
+  const sendMessage = useSendMessageToAI(sessionId, wallets[0]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -182,9 +182,9 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
       <div className="flex items-center justify-center h-screen">
         <div className="flex flex-col items-center space-y-4">
           <div className="flex space-x-2">
-            <div className="w-3 h-3 bg-accent/50 rounded-full animate-pulse"></div>
-            <div className="w-3 h-3 bg-accent/50 rounded-full animate-pulse delay-150"></div>
-            <div className="w-3 h-3 bg-accent/50 rounded-full animate-pulse delay-300"></div>
+            <div className="w-3 h-3 rounded-full bg-accent/50 animate-pulse"></div>
+            <div className="w-3 h-3 delay-150 rounded-full bg-accent/50 animate-pulse"></div>
+            <div className="w-3 h-3 delay-300 rounded-full bg-accent/50 animate-pulse"></div>
           </div>
           <p className="text-muted-foreground">Loading session...</p>
         </div>
@@ -195,8 +195,8 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
   if (sessionError || !session) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="flex flex-col items-center space-y-4 max-w-md text-center p-6 bg-card rounded-2xl shadow-md border border-border/50">
-          <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+        <div className="flex flex-col items-center max-w-md p-6 space-y-4 text-center border shadow-md bg-card rounded-2xl border-border/50">
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-accent/10">
             <AgentLogo className="rounded-lg" />
           </div>
           <h2 className="text-xl font-semibold">Session Error</h2>
@@ -205,7 +205,7 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
           </p>
           <Link
             href="/chat/new"
-            className="px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors"
+            className="px-4 py-2 transition-colors rounded-lg bg-accent text-accent-foreground hover:bg-accent/90"
           >
             Create a new session
           </Link>
@@ -218,7 +218,7 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
     <div className="flex flex-col h-screen">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 pb-32 scroll-smooth scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none]">
-        <div className="max-w-3xl mx-auto w-full space-y-2">
+        <div className="w-full max-w-3xl mx-auto space-y-2">
           {messages.map((message) => (
             <div key={message.id}>
               {message.role === "user" ? (
@@ -231,14 +231,14 @@ export function ChatSession({ sessionId }: ChatSessionProps) {
           {sendMessage.isPending && (
             <div className="flex justify-start mb-4 message-animation">
               <div className="flex relative items-start max-w-[85%]">
-                <div className="absolute -left-10 top-1 w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                <div className="absolute flex items-center justify-center w-8 h-8 rounded-full -left-10 top-1 bg-accent/10">
                   <AgentLogo className="rounded-lg"/>
                 </div>
                 <div className="px-4 py-3 text-[15px] tracking-[-0.01em] leading-[1.65] font-medium rounded-2xl bg-secondary text-secondary-foreground rounded-bl-none shadow-sm">
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-accent/50 rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-accent/50 rounded-full animate-pulse delay-150"></div>
-                    <div className="w-2 h-2 bg-accent/50 rounded-full animate-pulse delay-300"></div>
+                    <div className="w-2 h-2 rounded-full bg-accent/50 animate-pulse"></div>
+                    <div className="w-2 h-2 delay-150 rounded-full bg-accent/50 animate-pulse"></div>
+                    <div className="w-2 h-2 delay-300 rounded-full bg-accent/50 animate-pulse"></div>
                   </div>
                 </div>
               </div>

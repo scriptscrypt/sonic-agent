@@ -239,11 +239,12 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
   const { wallets } = useWalletContext();
   const { user } = useAuth();
 
+  const walletPrivy = wallets[0];
   // Use React Query hooks
   const createSession = useCreateChatSession();
   const createMessage = useCreateChatMessage(0); // The sessionId will be set after creation
 
-  const filteredIntegrations =
+   const filteredIntegrations =
     selectedCategory === "all"
       ? SUGGESTIONS
       : SUGGESTIONS.filter(
@@ -304,7 +305,8 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
         body: JSON.stringify({ 
           message: messageToSend, 
           modelName: selectedModel.name,
-          userId: user?.id
+          userId: user?.id,
+          wallet: walletPrivy
         }),
       });
 
@@ -371,11 +373,11 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
       <div className="flex flex-col items-center justify-center min-h-screen px-4 py-16 sm:py-32 scroll-smooth">
         <div className="w-full max-w-3xl flex flex-col gap-[10vh] sm:gap-[20vh] mt-[10vh] sm:mt-[20vh]">
           <div
-            className="flex flex-col gap-8 sm:gap-12 w-full"
+            className="flex flex-col w-full gap-8 sm:gap-12"
             ref={inputSectionRef}
           >
             <div className="space-y-4">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-foreground text-center">
+              <h1 className="text-2xl font-medium text-center sm:text-3xl md:text-4xl text-foreground">
                 What actions on Sonic you wanna take?
               </h1>
             </div>
@@ -398,7 +400,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
                   setSelectedChainType={setSelectedChainType}
                 />
               </div>
-              <div className="flex flex-row flex-wrap gap-2 items-center justify-center">
+              <div className="flex flex-row flex-wrap items-center justify-center gap-2">
                 {QUICK_SUGGESTIONS.map((suggestion, index) => (
                   <button
                     key={index}
@@ -429,7 +431,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
                   ({filteredIntegrations.length})
                 </span>
               </div>
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map((category, index) => (
                   <button
                     key={index}
@@ -448,7 +450,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pb-16 sm:pb-32">
+            <div className="grid grid-cols-1 gap-2 pb-16 sm:grid-cols-2 sm:gap-3 sm:pb-32">
               {filteredIntegrations.map((integration, index) => (
                 <IntegrationCard
                   key={index}
