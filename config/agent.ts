@@ -4,12 +4,19 @@ import { ChatDeepSeek } from "@langchain/deepseek";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
-import { createSonicTools, SonicAgentKit } from "@sendaifun/sonic-agent-kit";
+// import { createSonicTools, SonicAgentKit } from "@sendaifun/sonic-agent-kit";
+import {
+  BaseWallet,
+  createVercelAITools,
+  SolanaAgentKit,
+} from "../agent-kit-v2/packages/core/src";
+import { usePrivy } from "@privy-io/react-auth";
 
 export async function initializeAgent(
   modelName: string,
   chainType: "solana" | "sonic"
 ) {
+  const { user } = usePrivy();
   const llm = modelName?.includes("OpenAI")
     ? new ChatOpenAI({
         modelName: "gpt-4o-mini",
@@ -30,34 +37,20 @@ export async function initializeAgent(
 
   validateEnvironment();
 
-  const sonicAgent = new SonicAgentKit(
-    process.env.SONIC_PRIVATE_KEY! as string,
-    process.env.SONIC_RPC_URL! as string,
+  const wallet = user?.wallet;
+  const sonicAgent = new SolanaAgentKit(
+    wallet as unknown as BaseWallet,
+    process.env.SOLANA_RPC_URL! as string,
     {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY! as string,
     }
   );
   console.log("sonicAgent", sonicAgent);
-  const sonicTools = createSonicTools(sonicAgent);
+  const sonicTools = createVercelAITools(sonicAgent, sonicAgent?.actions);
   const memory = new MemorySaver();
   const config = {
     configurable: { thread_id: Math.random().toString(36).substring(2, 15) },
   };
 
-  const agent = createReactAgent({
-    llm,
-    tools: sonicTools,
-    checkpointSaver: memory,
-    messageModifier: `
-        You are a helpful agent that can interact onchain using the Solana Agent Kit. You are
-        empowered to interact onchain using your tools. If you ever need funds, you can request them from the
-        faucet. If not, you can provide your wallet details and request funds from the user. If there is a 5XX
-        (internal) HTTP error code, ask the user to try again later. If someone asks you to do something you
-        can't do with your currently available tools, you must say so, and encourage them to implement it
-        themselves using the Solana Agent Kit, recommend they go to https://www.solanaagentkit.xyz for more information. Be
-        concise and helpful with your responses. Refrain from restating your tools' descriptions unless it is explicitly requested.
-      `,
-  });
-
-  return { agent, config };
+  return { tools: sonicTools };
 }

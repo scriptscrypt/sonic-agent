@@ -5,6 +5,8 @@ import { Keypair } from "@solana/web3.js";
 import bs58 from "bs58";
 import { tokenRepository } from "@/db/repositories/tokenRepository";
 import { nftRepository } from "@/db/repositories/nftRepository";
+import { CoreMessage, streamText } from "ai";
+import { openai } from "@ai-sdk/openai";
 
 // Helper function to extract token information from response
 function extractTokenInfo(response: string) {
@@ -85,7 +87,7 @@ export async function POST(req: NextRequest) {
     console.log("Chat API called with:", { message, modelName, userId });
     
     // Get the agent
-    const { agent, config } = await getAgent(modelName || "default", "sonic");
+    const { tools } = await getAgent(modelName || "default", "sonic");
 
     const messages = [
       new HumanMessage({
@@ -94,21 +96,13 @@ export async function POST(req: NextRequest) {
     ];
 
     console.log("Streaming response from agent...");
-    const stream = await agent.stream({ messages }, config);
+    const stream = await streamText({
+      model: openai("gpt-4o"),
+      tools,
+      messages: messages as unknown as CoreMessage[],
+    });
 
-    let response = "";
-
-    for await (const chunk of stream) {
-      if ("agent" in chunk) {
-        console.log("Agent chunk received:", chunk.agent);
-        response += chunk.agent.messages[0].content + "\n";
-      } else if ("tools" in chunk) {
-        console.log("Tools chunk received:", chunk.tools.messages[0].content);
-      }
-    }
-
-    console.log("Final response:", response);
-    
+    let response = stream?.response as unknown as string;
     // Check if a token was created
     const tokenInfo = extractTokenInfo(response);
     if (tokenInfo && userId) {
