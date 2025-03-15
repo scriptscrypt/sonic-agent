@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
     console.log("Chat API called with:", { message, modelName, userId });
     
     // Get the agent
-    const { agent, config } = await getAgent(modelName || "default", "sonic");
+    const { agent, config } = await getAgent();
 
     const messages = [
       new HumanMessage({
