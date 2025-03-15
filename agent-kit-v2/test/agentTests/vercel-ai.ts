@@ -1,9 +1,9 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { Message, streamText } from "ai";
+import { type Message, streamText } from "ai";
 import { randomUUID } from "node:crypto";
 import { createVercelAITools } from "solana-agent-kit";
-import { SolanaAgentKit } from "solana-agent-kit";
-import { question, rl } from "utils";
+import type { SolanaAgentKit } from "solana-agent-kit";
+import { question, rl } from "../utils";
 
 export default async function (agent: SolanaAgentKit) {
   const tools = createVercelAITools(agent, agent.actions);

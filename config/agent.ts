@@ -16,7 +16,7 @@ export async function initializeAgent(
   chainType: "solana" | "sonic", 
   wallet: any
 ) {
-  // Remove the usePrivy hook as it can't be used in server components
+  // Removed the usePrivy hook as it can't be used in server components
   // const { user } = usePrivy();
   
   const llm = modelName?.includes("OpenAI")
