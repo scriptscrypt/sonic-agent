@@ -3,94 +3,110 @@ import { tokenRepository } from "@/db/repositories/tokenRepository";
 import { getAgent } from "@/lib/solana-agent";
 import { openai } from "@ai-sdk/openai";
 import { HumanMessage } from "@langchain/core/messages";
-import { streamText, ToolSet } from "ai";
+import { Message, streamText, ToolSet } from "ai";
+import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 // Helper function to extract token information from response
 function extractTokenInfo(response: string) {
   // Look for token creation patterns in the response
-  const tokenNameMatch = response.match(/created a new token[:\s]+["']?([^"'\n.]+)["']?/i) || 
-                         response.match(/token called ["']?([^"'\n.]+)["']?/i) ||
-                         response.match(/token named ["']?([^"'\n.]+)["']?/i);
-  
+  const tokenNameMatch =
+    response.match(/created a new token[:\s]+["']?([^"'\n.]+)["']?/i) ||
+    response.match(/token called ["']?([^"'\n.]+)["']?/i) ||
+    response.match(/token named ["']?([^"'\n.]+)["']?/i);
+
   const symbolMatch = response.match(/symbol[:\s]+["']?([A-Z0-9]{2,10})["']?/i);
-  const mintAddressMatch = response.match(/mint address[:\s]+["']?([a-zA-Z0-9]{32,44})["']?/i) ||
-                           response.match(/token address[:\s]+["']?([a-zA-Z0-9]{32,44})["']?/i);
-  
+  const mintAddressMatch =
+    response.match(/mint address[:\s]+["']?([a-zA-Z0-9]{32,44})["']?/i) ||
+    response.match(/token address[:\s]+["']?([a-zA-Z0-9]{32,44})["']?/i);
+
   if (tokenNameMatch && symbolMatch && mintAddressMatch) {
     return {
       name: tokenNameMatch[1].trim(),
       symbol: symbolMatch[1].trim(),
       mintAddress: mintAddressMatch[1].trim(),
       description: `A token created via the Sonic chat interface.`,
-      logoUrl: `https://cryptologos.cc/logos/${tokenNameMatch[1].toLowerCase().replace(/\s+/g, '-')}-logo.png`,
+      logoUrl: `https://cryptologos.cc/logos/${tokenNameMatch[1]
+        .toLowerCase()
+        .replace(/\s+/g, "-")}-logo.png`,
       price: (Math.random() * 10).toString(), // Convert to string
       marketCap: Math.floor(Math.random() * 1000000000).toString(), // Convert to string
       volume24h: Math.floor(Math.random() * 100000000).toString(), // Convert to string
-      change24h: ((Math.random() * 20) - 10).toString(), // Convert to string
-      metadata: JSON.stringify({ createdViaSonic: true })
+      change24h: (Math.random() * 20 - 10).toString(), // Convert to string
+      metadata: JSON.stringify({ createdViaSonic: true }),
     };
   }
-  
+
   return null;
 }
 
 // Helper function to extract NFT information from response
 function extractNFTInfo(response: string) {
   // Look for NFT creation patterns in the response
-  const nftNameMatch = response.match(/created a new NFT[:\s]+["']?([^"'\n.]+)["']?/i) || 
-                       response.match(/NFT called ["']?([^"'\n.]+)["']?/i) ||
-                       response.match(/NFT named ["']?([^"'\n.]+)["']?/i);
-  
-  const mintAddressMatch = response.match(/mint address[:\s]+["']?([a-zA-Z0-9]{32,44})["']?/i) ||
-                           response.match(/NFT address[:\s]+["']?([a-zA-Z0-9]{32,44})["']?/i);
-  
-  const imageUrlMatch = response.match(/image URL[:\s]+["']?([^\s"']+)["']?/i) ||
-                        response.match(/image[:\s]+["']?([^\s"']+)["']?/i);
-  
+  const nftNameMatch =
+    response.match(/created a new NFT[:\s]+["']?([^"'\n.]+)["']?/i) ||
+    response.match(/NFT called ["']?([^"'\n.]+)["']?/i) ||
+    response.match(/NFT named ["']?([^"'\n.]+)["']?/i);
+
+  const mintAddressMatch =
+    response.match(/mint address[:\s]+["']?([a-zA-Z0-9]{32,44})["']?/i) ||
+    response.match(/NFT address[:\s]+["']?([a-zA-Z0-9]{32,44})["']?/i);
+
+  const imageUrlMatch =
+    response.match(/image URL[:\s]+["']?([^\s"']+)["']?/i) ||
+    response.match(/image[:\s]+["']?([^\s"']+)["']?/i);
+
   if (nftNameMatch && mintAddressMatch) {
     return {
       name: nftNameMatch[1].trim(),
       mintAddress: mintAddressMatch[1].trim(),
       description: `An NFT created via the Sonic chat interface.`,
-      imageUrl: imageUrlMatch ? imageUrlMatch[1].trim() : 'https://picsum.photos/seed/nft/500/500',
-      metadata: JSON.stringify({ 
+      imageUrl: imageUrlMatch
+        ? imageUrlMatch[1].trim()
+        : "https://picsum.photos/seed/nft/500/500",
+      metadata: JSON.stringify({
         attributes: [
-          { trait_type: 'Origin', value: 'Sonic Chat' },
-          { trait_type: 'Rarity', value: ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'][Math.floor(Math.random() * 5)] }
+          { trait_type: "Origin", value: "Sonic Chat" },
+          {
+            trait_type: "Rarity",
+            value: ["Common", "Uncommon", "Rare", "Epic", "Legendary"][
+              Math.floor(Math.random() * 5)
+            ],
+          },
         ],
-        createdViaSonic: true
-      })
+        createdViaSonic: true,
+      }),
     };
   }
-  
+
   return null;
 }
 
 export async function POST(req: NextRequest) {
   try {
     // Parse the request body
-    const body = await req.json().catch(error => {
+    const body = await req.json().catch((error) => {
       console.error("Error parsing request body:", error);
       throw new Error("Invalid request body");
     });
-    
+
     const { message, modelName, userId, wallet } = body;
-    
+
     if (!message) {
       console.error("Missing message in request");
-      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Message is required" },
+        { status: 400 }
+      );
     }
-    
+
     console.log("Chat API called with:", { message, modelName, userId });
-    
+
     // Get the agent with the wallet
     const { tools } = await getAgent(modelName || "default", "sonic", wallet);
 
-    const messages = [
-      new HumanMessage({
-        content: message
-      })
+    const messages: Message[] = [
+      { content: message, id: randomUUID(), role: "user" },
     ];
 
     console.log("Streaming response from agent...");
@@ -118,14 +134,14 @@ export async function POST(req: NextRequest) {
         console.log("Token detected, adding to database:", tokenInfo);
         await tokenRepository.createToken({
           ...tokenInfo,
-          userId: parseInt(userId)
+          userId: parseInt(userId),
         });
         console.log("Token added to database successfully");
       } catch (error) {
         console.error("Error adding token to database:", error);
       }
     }
-    
+
     // Check if an NFT was created
     const nftInfo = extractNFTInfo(response);
     if (nftInfo && userId) {
@@ -133,20 +149,23 @@ export async function POST(req: NextRequest) {
         console.log("NFT detected, adding to database:", nftInfo);
         await nftRepository.createNFT({
           ...nftInfo,
-          userId: parseInt(userId)
+          userId: parseInt(userId),
         });
         console.log("NFT added to database successfully");
       } catch (error) {
         console.error("Error adding NFT to database:", error);
       }
     }
-    
+
     return stream.toTextStreamResponse();
   } catch (error) {
     console.error("Error in chat API:", error);
-    return NextResponse.json({ 
-      error: "Internal Server Error", 
-      details: error instanceof Error ? error.message : String(error) 
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Internal Server Error",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }

@@ -3,14 +3,20 @@ import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatDeepSeek } from "@langchain/deepseek";
 import { ChatOpenAI } from "@langchain/openai";
 import {
+  KeypairWallet,
   SolanaAgentKit,
-  createVercelAITools
-} from "../agent-kit/packages/core/src";
-import BlinksPlugin from "../agent-kit/packages/plugin-blinks/src";
-import DefiPlugin from "../agent-kit/packages/plugin-defi/src";
-import MiscPlugin from "../agent-kit/packages/plugin-misc/src";
-import NFTPlugin from "../agent-kit/packages/plugin-nft/src";
-import TokenPlugin from "../agent-kit/packages/plugin-token/src";
+  createVercelAITools,
+} from "solana-agent-kit";
+import { Keypair } from "@solana/web3.js";
+// import {
+//   SolanaAgentKit,
+//   createVercelAITools
+// } from "../agent-kit/packages/core/src";
+// import BlinksPlugin from "../agent-kit/packages/plugin-blinks/src";
+// import DefiPlugin from "../agent-kit/packages/plugin-defi/src";
+// import MiscPlugin from "../agent-kit/packages/plugin-misc/src";
+// import NFTPlugin from "../agent-kit/packages/plugin-nft/src";
+import TokenPlugin from "@solana-agent-kit/plugin-token";
 
 export async function initializeAgent(
   modelName: string,
@@ -37,19 +43,22 @@ export async function initializeAgent(
 
   validateEnvironment();
 
-  if (!wallet) {
-    console.error("No wallet provided to initializeAgent");
-    return { tools: [] };
-  }
+  // if (!wallet) {
+  //   console.error("No wallet provided to initializeAgent");
+  //   return { tools: [] };
+  // }
 
-  const solanaAgent = new SolanaAgentKit(wallet, process.env.SOLANA_RPC_URL!, {
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
-  })
-    .use(TokenPlugin)
-    .use(NFTPlugin)
-    .use(DefiPlugin)
-    .use(MiscPlugin)
-    .use(BlinksPlugin);
+  const solanaAgent = new SolanaAgentKit(
+    new KeypairWallet(new Keypair()),
+    process.env.SOLANA_RPC_URL!,
+    {
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
+    }
+  ).use(TokenPlugin);
+  // .use(NFTPlugin)
+  // .use(DefiPlugin)
+  // .use(MiscPlugin)
+  // .use(BlinksPlugin);
 
   console.log("solanaAgent", solanaAgent);
 
